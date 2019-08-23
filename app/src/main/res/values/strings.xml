@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">NewsApp</string>
+    <string name="text">Hello, world!\nThis is a news app</string>
 </resources>
