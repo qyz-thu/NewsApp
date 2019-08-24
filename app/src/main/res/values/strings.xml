@@ -2,4 +2,7 @@
     <string name="app_name">NewsApp</string>
     <string name="text">Hello, world!\nThis is a news app</string>
     <string name="another_text">This text test the use of setTExt().</string>
+    <string name="button">My Button</string>
+    <string name="text2">Here is a button.</string>
+    <string name="rejection">No, we don\'t wanna show Hello World.</string>
 </resources>
