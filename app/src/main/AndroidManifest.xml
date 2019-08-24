@@ -16,6 +16,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".MyService"/>
+
+        <receiver android:name="MyReceiver">
+            <intent-filter>
+                <!--<action android:name="android.intent.aciton.BOOT_COMPLETED"></action>-->
+                <action android:name="com.newsapp.CUSTOM_INTENT">
+                </action>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
