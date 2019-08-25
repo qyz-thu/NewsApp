@@ -9,10 +9,12 @@ import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class News implements Comparable<News> {
     String lang;
@@ -62,13 +64,16 @@ public class News implements Comparable<News> {
         this.newsID = json.optString("newsID");
         this.publisher = json.optString("publisher");
         this.category = json.optString("category");
+        Log.d("News", json.toString());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         try {
-            this.publishTime = DateFormat.getDateTimeInstance().parse(json.optString("publishTime"));
+            this.publishTime = format.parse(json.optString("publishTime"));
         } catch (ParseException e) {
+            e.printStackTrace();
             this.publishTime = new Date();
         }
         try {
-            this.crawlTime = DateFormat.getDateTimeInstance().parse(json.optString("crawlTime"));
+            this.crawlTime = format.parse(json.optString("crawlTime"));
         } catch (ParseException e) {
             this.crawlTime = new Date();
         }
