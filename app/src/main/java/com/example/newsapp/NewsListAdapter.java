@@ -1,6 +1,7 @@
 package com.example.newsapp;
 
 import android.text.Layout;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +37,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             Log.d("Adapter", news.images.get(0));
             Glide.with(parent).load(news.images.get(0)).centerInside().into(holder.imageView);
         }
+        holder.timeView.setText(DateUtils.getRelativeTimeSpanString(news.publishTime.getTime()));
     }
 
     @Override
@@ -47,12 +49,14 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         View itemView;
         ImageView imageView;
         TextView titleView;
+        TextView timeView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             this.itemView = itemView;
             imageView = itemView.findViewById(R.id.imageView);
             titleView = itemView.findViewById(R.id.titleView);
+            timeView = itemView.findViewById(R.id.timeView);
         }
     }
 }
