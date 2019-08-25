@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NewsApp</string>
+    <string name="app_name">陈嘉杰千英卓_News</string>
     <string name="text">Hello, world!\nThis is a news app</string>
     <string name="another_text">This text test the use of setTExt().</string>
     <string name="button">My Button</string>
