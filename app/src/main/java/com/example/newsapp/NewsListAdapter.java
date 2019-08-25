@@ -34,7 +34,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         holder.titleView.setText(news.title);
         if (!news.images.isEmpty()) {
             Log.d("Adapter", news.images.get(0));
-            Glide.with(parent).load(news.images.get(0)).into(holder.imageView);
+            Glide.with(parent).load(news.images.get(0)).centerInside().into(holder.imageView);
         }
     }
 

@@ -1,22 +1,19 @@
 package com.example.newsapp;
 
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
@@ -26,9 +23,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 public class MainActivity extends AppCompatActivity {
     String msg = "Android: ";
@@ -67,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONArray data = null;
                 try {
                     data = response.getJSONArray("data");
-                    for (int i = 0;i < data.length();i++) {
+                    for (int i = 0; i < data.length(); i++) {
                         allNews.add(new News(data.getJSONObject(i)));
                     }
                     Collections.sort(allNews);
