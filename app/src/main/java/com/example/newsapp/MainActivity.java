@@ -41,9 +41,6 @@ public class MainActivity extends AppCompatActivity {
         allNews = new ArrayList<>();
         queue = Volley.newRequestQueue(this);
 
-        TextView textView = findViewById(R.id.text1);
-        textView.setText(R.string.rejection);
-
         SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
@@ -58,8 +55,8 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd%20HH:mm:ss", Locale.CHINA);
         String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=15&startDate=2019-07-01&endDate=%s&words=&categories=", format.format(new Date()));
         Log.d("Main", url);
-        JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
+        JsonObjectRequest req = new JsonObjectRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 Log.d("main", response.toString());
