@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">陈嘉杰千英卓_News</string>
+    <string name="app_name">Elephant News</string>
     <string name="text">Hello, world!\nThis is a news app</string>
     <string name="button">My Button</string>
     <string name="text2">Here is a button.</string>

@@ -1,7 +1,11 @@
 package com.example.newsapp;
 
+import android.app.ActionBar;
+import android.app.Activity;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Window;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,8 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
-    String msg = "Android: ";
+public class MainActivity extends Activity {
     NewsListAdapter adapter;
     List<News> allNews;
     RequestQueue queue;
@@ -36,7 +39,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        //getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title);
+
+        TextView titletext = findViewById(R.id.title_text);
+        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Lato-Regular.ttf");
+        titletext.setTypeface(tf);
 
         allNews = new ArrayList<>();
         queue = Volley.newRequestQueue(this);

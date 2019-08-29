@@ -11,7 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
-        android:theme="@style/AppTheme">
+        android:theme="@android:style/Theme.Light">
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,15 +21,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".MyService"/>
 
-        <receiver android:name="MyReceiver">
-            <intent-filter>
-                <!--<action android:name="android.intent.aciton.BOOT_COMPLETED"></action>-->
-                <action android:name="com.newsapp.CUSTOM_INTENT">
-                </action>
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>
