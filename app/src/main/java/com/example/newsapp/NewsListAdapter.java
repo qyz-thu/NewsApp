@@ -39,8 +39,6 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 Glide.with(parent).load(news.images.get(0)).centerInside().into(holder.imageView);
             else
             {
-//                ImageView view = parent.findViewById(R.id.imageView);
-//                view.setImageResource(R.drawable.elephant);
                 int resourceId = R.drawable.elephant;
                 Glide.with(parent).load(resourceId).centerInside().into(holder.imageView);
             }
