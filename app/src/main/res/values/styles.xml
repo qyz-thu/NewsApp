@@ -3,19 +3,24 @@
     <!-- Base application theme. -->
     <!--    android:Theme.Holo-->
     <style name="AppThemeLight" parent="@style/Theme.MaterialComponents.Light">
-        <!-- Customize your theme here. -->
         <item name="android:windowTitleSize">50dp</item>
         <item name="windowActionBar">true</item>
         <item name="android:actionBarSize">50dp</item>
         <item name="android:layout_centerInParent">true</item>
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
     </style>
 
     <style name="AppThemeDark" parent="@style/Theme.MaterialComponents">
-        <!-- Customize your theme here. -->
         <item name="android:windowTitleSize">50dp</item>
         <item name="windowActionBar">true</item>
         <item name="android:actionBarSize">50dp</item>
         <item name="android:layout_centerInParent">true</item>
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+    </style>
+
+    <style name="WindowAnimationTransition">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
     </style>
 
 </resources>

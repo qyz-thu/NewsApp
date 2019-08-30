@@ -3,6 +3,7 @@ package com.example.newsapp;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -66,7 +67,9 @@ public class MainActivity extends Activity {
                 pref.putBoolean("darkMode", !sharedPreferences.getBoolean("darkMode", false));
                 pref.apply();
 
-                recreate();
+                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
                 return false;
             }
         });
