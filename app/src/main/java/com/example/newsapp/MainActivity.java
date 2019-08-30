@@ -8,7 +8,9 @@ import android.util.Log;
 import android.view.Window;
 import android.widget.TextView;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -42,6 +44,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+
+        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
 
         TextView titletext = findViewById(R.id.title_text);
         Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Lato-Regular.ttf");
