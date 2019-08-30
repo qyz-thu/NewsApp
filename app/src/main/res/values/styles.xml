@@ -2,7 +2,7 @@
 
     <!-- Base application theme. -->
 <!--    android:Theme.Holo-->
-    <style name="AppTheme" parent="@style/Theme.Design.Light">
+    <style name="AppTheme" parent="@style/Theme.MaterialComponents.Light">
         <!-- Customize your theme here. -->
         <item name="android:windowTitleSize">50dp</item>
         <item name="windowActionBar">true</item>
