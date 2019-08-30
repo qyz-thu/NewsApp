@@ -2,9 +2,12 @@ package com.example.newsapp;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
@@ -33,6 +36,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.prefs.Preferences;
 
 public class MainActivity extends Activity {
     NewsListAdapter adapter;
@@ -42,6 +46,10 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+        if (sharedPreferences.getBoolean("darkMode", false)) {
+            setTheme(R.style.AppThemeDark);
+        }
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
@@ -50,6 +58,18 @@ public class MainActivity extends Activity {
         TextView titletext = findViewById(R.id.title_text);
         Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Lato-Regular.ttf");
         titletext.setTypeface(tf);
+
+        titletext.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                SharedPreferences.Editor pref = sharedPreferences.edit();
+                pref.putBoolean("darkMode", !sharedPreferences.getBoolean("darkMode", false));
+                pref.apply();
+
+                recreate();
+                return false;
+            }
+        });
 
         allNews = new ArrayList<>();
         queue = Volley.newRequestQueue(this);

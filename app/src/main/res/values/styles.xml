@@ -1,19 +1,20 @@
 <resources>
 
     <!-- Base application theme. -->
-<!--    android:Theme.Holo-->
-    <style name="AppTheme" parent="@style/Theme.MaterialComponents.Light">
+    <!--    android:Theme.Holo-->
+    <style name="AppThemeLight" parent="@style/Theme.MaterialComponents.Light">
         <!-- Customize your theme here. -->
         <item name="android:windowTitleSize">50dp</item>
         <item name="windowActionBar">true</item>
         <item name="android:actionBarSize">50dp</item>
-<!--        <item name="windowNoTitle">false</item>-->
-<!--        <item name="windowActionBarOverlay">false</item>-->
-<!--        <item name="android:textSize">15sp</item>-->
-<!--        <item name="actionBarSize">40dp</item>-->
-<!--        <item name="colorPrimary">@color/colorPrimary</item>-->
-<!--        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
-<!--        <item name="colorAccent">@color/colorAccent</item>-->
+        <item name="android:layout_centerInParent">true</item>
+    </style>
+
+    <style name="AppThemeDark" parent="@style/Theme.MaterialComponents">
+        <!-- Customize your theme here. -->
+        <item name="android:windowTitleSize">50dp</item>
+        <item name="windowActionBar">true</item>
+        <item name="android:actionBarSize">50dp</item>
         <item name="android:layout_centerInParent">true</item>
     </style>
 
