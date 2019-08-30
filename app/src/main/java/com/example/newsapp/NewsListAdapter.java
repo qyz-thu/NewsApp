@@ -35,7 +35,15 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         holder.titleView.setText(news.title);
         if (!news.images.isEmpty()) {
             Log.d("Adapter", news.images.get(0));
-            Glide.with(parent).load(news.images.get(0)).centerInside().into(holder.imageView);
+            if (!news.images.get(0).equals(""))
+                Glide.with(parent).load(news.images.get(0)).centerInside().into(holder.imageView);
+            else
+            {
+//                ImageView view = parent.findViewById(R.id.imageView);
+//                view.setImageResource(R.drawable.elephant);
+                int resourceId = R.drawable.elephant;
+                Glide.with(parent).load(resourceId).centerInside().into(holder.imageView);
+            }
         }
         holder.timeView.setText(DateUtils.getRelativeTimeSpanString(news.publishTime.getTime()));
     }

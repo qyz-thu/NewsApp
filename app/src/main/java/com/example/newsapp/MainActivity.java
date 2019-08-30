@@ -9,6 +9,7 @@ import android.view.Window;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -41,7 +42,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-        //getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title);
 
         TextView titletext = findViewById(R.id.title_text);
         Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Lato-Regular.ttf");
@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter = new NewsListAdapter(this));
 
         fetchData();
