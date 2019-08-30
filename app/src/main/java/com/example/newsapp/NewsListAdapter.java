@@ -1,8 +1,6 @@
 package com.example.newsapp;
 
-import android.text.Layout;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,12 +11,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.newsapp.model.News;
 
-public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHolder> {
+import io.realm.RealmRecyclerViewAdapter;
+import io.realm.RealmResults;
+
+public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdapter.ViewHolder> {
 
     MainActivity parent;
 
-    NewsListAdapter(MainActivity parent) {
+    NewsListAdapter(RealmResults<News> list, MainActivity parent) {
+        super(list, true, true);
         this.parent = parent;
     }
 
@@ -31,14 +34,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull NewsListAdapter.ViewHolder holder, int position) {
-        News news = parent.allNews.get(position);
+        News news = getItem(position);
         holder.titleView.setText(news.title);
         if (!news.images.isEmpty()) {
-            Log.d("Adapter", news.images.get(0));
             if (!news.images.get(0).equals(""))
                 Glide.with(parent).load(news.images.get(0)).centerInside().into(holder.imageView);
-            else
-            {
+            else {
                 int resourceId = R.drawable.elephant;
                 Glide.with(parent).load(resourceId).centerInside().into(holder.imageView);
             }
@@ -46,10 +47,6 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         holder.timeView.setText(DateUtils.getRelativeTimeSpanString(news.publishTime.getTime()));
     }
 
-    @Override
-    public int getItemCount() {
-        return parent.allNews.size();
-    }
 
     class ViewHolder extends RecyclerView.ViewHolder {
         View itemView;

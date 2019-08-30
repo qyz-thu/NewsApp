@@ -1,6 +1,5 @@
 package com.example.newsapp;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -12,13 +11,9 @@ import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -26,23 +21,24 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.newsapp.model.News;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-import java.util.prefs.Preferences;
+
+import io.realm.Realm;
+import io.realm.RealmResults;
+import io.realm.Sort;
 
 public class MainActivity extends Activity {
     NewsListAdapter adapter;
-    List<News> allNews;
     RequestQueue queue;
+    Realm realm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,13 +50,13 @@ public class MainActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
-        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        realm = Realm.getDefaultInstance();
 
-        TextView titletext = findViewById(R.id.title_text);
+        TextView titleText = findViewById(R.id.title_text);
         Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Lato-Regular.ttf");
-        titletext.setTypeface(tf);
+        titleText.setTypeface(tf);
 
-        titletext.setOnLongClickListener(new View.OnLongClickListener() {
+        titleText.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
                 SharedPreferences.Editor pref = sharedPreferences.edit();
@@ -74,46 +70,65 @@ public class MainActivity extends Activity {
             }
         });
 
-        allNews = new ArrayList<>();
         queue = Volley.newRequestQueue(this);
-
-        SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter = new NewsListAdapter(this));
+        final LinearLayoutManager manager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(manager);
+        RealmResults<News> results = realm.where(News.class).findAll().sort("publishTime", Sort.DESCENDING);
+        recyclerView.setAdapter(adapter = new NewsListAdapter(results, this));
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                int last = manager.findLastVisibleItemPosition();
 
-        fetchData();
+                if (!recyclerView.canScrollVertically(1) || last + 5 > manager.getItemCount()) {
+                    Date publishTime = adapter.getItem(last).publishTime;
+                    publishTime.setTime(publishTime.getTime() - 1);
+                    fetchData(publishTime);
+                }
+            }
+        });
+
+        fetchData(null);
     }
 
-    void fetchData() {
+    void fetchData(Date endDate) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd%20HH:mm:ss", Locale.CHINA);
-        String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=15&startDate=2019-07-01&endDate=%s&words=&categories=", format.format(new Date()));
+        String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=15&endDate=%s&words=&categories=", format.format(endDate != null ? endDate : new Date()));
         Log.d("Main", url);
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                Log.d("main", response.toString());
-                JSONArray data = null;
-                try {
-                    data = response.getJSONArray("data");
-                    for (int i = 0; i < data.length(); i++) {
-                        allNews.add(new News(data.getJSONObject(i)));
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("main", response.toString());
+                        JSONArray data = null;
+                        try {
+                            data = response.getJSONArray("data");
+                            for (int i = 0; i < data.length(); i++) {
+                                final JSONObject obj = data.getJSONObject(i);
+                                realm.executeTransaction(new Realm.Transaction() {
+                                    @Override
+                                    public void execute(Realm realm) {
+                                        News news = new News();
+                                        news.assign(obj);
+                                        realm.copyToRealmOrUpdate(news);
+                                    }
+                                });
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Log.d("main", String.format("%d", adapter.getItemCount()));
                     }
-                    Collections.sort(allNews);
-                    adapter.notifyDataSetChanged();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("main", "network", error);
-            }
-        });
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("main", "network", error);
+                    }
+                });
         queue.add(req);
     }
 
