@@ -53,24 +53,25 @@ public class MainActivity extends Activity {
     SwipeRefreshLayout swipeRefreshLayout;
     Date lastFetch;
     String category;
-    private boolean isDay=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+        // dark mode
+        if (sharedPreferences.getBoolean("darkMode", false)) {
+            setTheme(R.style.AppThemeDark);
+        }
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-
-        // dark mode
-        final Button shiftMode = findViewById(R.id.colored_elephant);
+        final Button shiftMode = findViewById(R.id.shift_mode);
         if (sharedPreferences.getBoolean("darkMode", false)) {
-            setTheme(R.style.AppThemeDark);
             shiftMode.setBackgroundResource(R.drawable.night);
-        }
-        realm = Realm.getDefaultInstance();
 
+        }
+
+        realm = Realm.getDefaultInstance();
 
         shiftMode.setOnClickListener(new View.OnClickListener() {
             @Override
