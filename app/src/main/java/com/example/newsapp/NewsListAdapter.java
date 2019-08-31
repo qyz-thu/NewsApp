@@ -52,7 +52,12 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
 
     @Override
     public long getItemId(int position) {
-        return this.getItem(position).newsID.hashCode();
+        News item = this.getItem(position);
+        if (item != null && item.newsID != null) {
+            return item.newsID.hashCode();
+        } else {
+            return 0;
+        }
     }
 
 
