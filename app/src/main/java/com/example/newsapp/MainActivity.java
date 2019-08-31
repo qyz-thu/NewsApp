@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -30,6 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,6 +82,7 @@ public class MainActivity extends Activity {
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
+        recyclerView.setItemViewCacheSize(20);
         final LinearLayoutManager manager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
         RealmResults<News> results = realm.where(News.class).findAllAsync().sort("publishTime", Sort.DESCENDING);
@@ -112,6 +113,10 @@ public class MainActivity extends Activity {
     }
 
     void fetchData(Date endDate) {
+        if (endDate == null) {
+            endDate = new Date();
+        }
+
         if (lastFetch != null && endDate.getTime() == lastFetch.getTime()) {
             return;
         }
@@ -119,13 +124,13 @@ public class MainActivity extends Activity {
         lastFetch = endDate;
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd%20HH:mm:ss", Locale.CHINA);
-        String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=15&endDate=%s&words=&categories=", format.format(endDate != null ? endDate : new Date()));
+        String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=15&endDate=%s&words=&categories=", format.format(endDate));
         Log.d("Main", url);
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(final JSONObject response) {
-                        new FetchDataTask(MainActivity.this).execute(response);
+                        new FetchDataTask(swipeRefreshLayout).execute(response);
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -139,20 +144,18 @@ public class MainActivity extends Activity {
 }
 
 class FetchDataTask extends AsyncTask<JSONObject, Integer, List<News>> {
-    MainActivity parent;
+    private WeakReference<SwipeRefreshLayout> swipeRefreshLayout;
 
-    FetchDataTask(MainActivity parent) {
-        this.parent = parent;
+    FetchDataTask(SwipeRefreshLayout swipeRefreshLayout) {
+        this.swipeRefreshLayout = new WeakReference<>(swipeRefreshLayout);
     }
 
     @Override
     protected List<News> doInBackground(JSONObject... jsonObjects) {
         final JSONObject response = jsonObjects[0];
-        Log.d("main", response.toString());
-        JSONArray data = null;
         List<News> result = new ArrayList<>();
         try {
-            data = response.getJSONArray("data");
+            JSONArray data = response.getJSONArray("data");
             for (int i = 0; i < data.length(); i++) {
                 final JSONObject obj = data.getJSONObject(i);
                 News news = new News();
@@ -162,14 +165,11 @@ class FetchDataTask extends AsyncTask<JSONObject, Integer, List<News>> {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Log.d("main", String.format("on main thread %b", Looper.getMainLooper().getThread() == Thread.currentThread()));
         return result;
     }
 
     @Override
     protected void onPostExecute(final List<News> allNews) {
-        long begin = new Date().getTime();
-        Log.d("main", String.format("on main thread %b", Looper.getMainLooper().getThread() == Thread.currentThread()));
         Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -179,7 +179,9 @@ class FetchDataTask extends AsyncTask<JSONObject, Integer, List<News>> {
             }
         });
 
-        parent.swipeRefreshLayout.setRefreshing(false);
-        Log.d("main", String.format("time %d", new Date().getTime() - begin));
+        SwipeRefreshLayout layout = swipeRefreshLayout.get();
+        if (layout != null) {
+            layout.setRefreshing(false);
+        }
     }
 }

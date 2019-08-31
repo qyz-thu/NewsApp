@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Elephant News</string>
-    <string name="text">Hello, world!\nThis is a news app</string>
-    <string name="button">My Button</string>
-    <string name="text2">Here is a button.</string>
+    <string name="home">Home</string>
+    <string name="categories">Categories</string>
 </resources>

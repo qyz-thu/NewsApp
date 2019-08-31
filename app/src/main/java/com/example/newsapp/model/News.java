@@ -13,6 +13,7 @@ import java.util.Locale;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
 public class News extends RealmObject implements Comparable<News> {
@@ -25,6 +26,8 @@ public class News extends RealmObject implements Comparable<News> {
     public String content;
     public String publisher;
     public String category;
+
+    @Index
     public Date publishTime;
     public Date crawlTime;
     public RealmList<String> images;

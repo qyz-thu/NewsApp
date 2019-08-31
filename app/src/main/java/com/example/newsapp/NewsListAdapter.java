@@ -67,7 +67,7 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
         TextView titleView;
         TextView timeView;
 
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             this.itemView = itemView;
             imageView = itemView.findViewById(R.id.imageView);

@@ -4,6 +4,8 @@ import android.app.Application;
 import android.util.Log;
 
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.exceptions.RealmMigrationNeededException;
 
 public class NewsApp extends Application {
     public NewsApp() {
@@ -15,6 +17,14 @@ public class NewsApp extends Application {
 
         Realm.init(this);
 
-        Log.i("main", "Realm inited");
+        // if migration is needed, simply clear the db
+        RealmConfiguration config = Realm.getDefaultConfiguration();
+        try {
+            Realm.getInstance(config);
+        } catch (RealmMigrationNeededException e){
+            Realm.deleteRealm(config);
+        }
+
+        Log.i("main", "Realm init done");
     }
 }
