@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.bumptech.glide.Glide;
 import com.example.newsapp.model.News;
@@ -40,9 +41,14 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
         News news = getItem(position);
         holder.titleView.setText(news.title);
         if (!news.images.isEmpty()) {
-            if (!news.images.get(0).equals(""))
-                Glide.with(parent).load(news.images.get(0)).centerInside().into(holder.imageView);
-            else {
+            String url = news.images.get(0);
+            if (url != null && url.length() > 0) {
+                CircularProgressDrawable drawable = new CircularProgressDrawable(parent);
+                drawable.setStrokeWidth(5);
+                drawable.setCenterRadius(30);
+                drawable.start();
+                Glide.with(parent).load(news.images.get(0)).placeholder(drawable).centerInside().into(holder.imageView);
+            } else {
                 int resourceId = R.drawable.elephant;
                 Glide.with(parent).load(resourceId).centerInside().into(holder.imageView);
             }
