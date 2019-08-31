@@ -101,7 +101,7 @@ public class MainActivity extends Activity {
                 super.onScrollStateChanged(recyclerView, newState);
                 int last = manager.findLastVisibleItemPosition();
 
-                if (last < adapter.getItemCount() && (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount())) {
+                if (last >= 0 && last < adapter.getItemCount() && (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount())) {
                     Date publishTime = adapter.getItem(last).publishTime;
                     publishTime.setTime(publishTime.getTime() - 1);
                     fetchData(publishTime);
@@ -161,7 +161,12 @@ public class MainActivity extends Activity {
                         break;
                 }
                 fetchData(null);
-                RealmResults<News> results = realm.where(News.class).equalTo("category", category).findAllAsync().sort("publishTime", Sort.DESCENDING);
+                RealmResults<News> results;
+                if (category.length() > 0) {
+                    results = realm.where(News.class).equalTo("category", category).findAllAsync().sort("publishTime", Sort.DESCENDING);
+                } else {
+                    results = realm.where(News.class).findAllAsync().sort("publishTime", Sort.DESCENDING);
+                }
                 adapter.updateData(results);
                 drawerLayout.closeDrawers();
                 return true;
