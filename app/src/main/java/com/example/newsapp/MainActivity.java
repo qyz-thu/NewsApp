@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -28,7 +31,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import io.realm.Realm;
@@ -39,10 +44,14 @@ public class MainActivity extends Activity {
     NewsListAdapter adapter;
     RequestQueue queue;
     Realm realm;
+    SwipeRefreshLayout swipeRefreshLayout;
+    Date lastFetch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // dark mode
         final SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
         if (sharedPreferences.getBoolean("darkMode", false)) {
             setTheme(R.style.AppThemeDark);
@@ -55,7 +64,6 @@ public class MainActivity extends Activity {
         TextView titleText = findViewById(R.id.title_text);
         Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Lato-Regular.ttf");
         titleText.setTypeface(tf);
-
         titleText.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -76,7 +84,7 @@ public class MainActivity extends Activity {
         recyclerView.setHasFixedSize(true);
         final LinearLayoutManager manager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
-        RealmResults<News> results = realm.where(News.class).findAll().sort("publishTime", Sort.DESCENDING);
+        RealmResults<News> results = realm.where(News.class).findAllAsync().sort("publishTime", Sort.DESCENDING);
         recyclerView.setAdapter(adapter = new NewsListAdapter(results, this));
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -84,7 +92,7 @@ public class MainActivity extends Activity {
                 super.onScrollStateChanged(recyclerView, newState);
                 int last = manager.findLastVisibleItemPosition();
 
-                if (!recyclerView.canScrollVertically(1) || last + 5 > manager.getItemCount()) {
+                if (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount()) {
                     Date publishTime = adapter.getItem(last).publishTime;
                     publishTime.setTime(publishTime.getTime() - 1);
                     fetchData(publishTime);
@@ -92,36 +100,32 @@ public class MainActivity extends Activity {
             }
         });
 
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                fetchData(null);
+            }
+        });
+
         fetchData(null);
     }
 
     void fetchData(Date endDate) {
+        if (lastFetch != null && endDate.getTime() == lastFetch.getTime()) {
+            return;
+        }
+
+        lastFetch = endDate;
+
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd%20HH:mm:ss", Locale.CHINA);
         String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=15&endDate=%s&words=&categories=", format.format(endDate != null ? endDate : new Date()));
         Log.d("Main", url);
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d("main", response.toString());
-                        JSONArray data = null;
-                        try {
-                            data = response.getJSONArray("data");
-                            for (int i = 0; i < data.length(); i++) {
-                                final JSONObject obj = data.getJSONObject(i);
-                                realm.executeTransaction(new Realm.Transaction() {
-                                    @Override
-                                    public void execute(Realm realm) {
-                                        News news = new News();
-                                        news.assign(obj);
-                                        realm.copyToRealmOrUpdate(news);
-                                    }
-                                });
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        Log.d("main", String.format("%d", adapter.getItemCount()));
+                    public void onResponse(final JSONObject response) {
+                        new FetchDataTask(MainActivity.this).execute(response);
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -132,4 +136,50 @@ public class MainActivity extends Activity {
         queue.add(req);
     }
 
+}
+
+class FetchDataTask extends AsyncTask<JSONObject, Integer, List<News>> {
+    MainActivity parent;
+
+    FetchDataTask(MainActivity parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    protected List<News> doInBackground(JSONObject... jsonObjects) {
+        final JSONObject response = jsonObjects[0];
+        Log.d("main", response.toString());
+        JSONArray data = null;
+        List<News> result = new ArrayList<>();
+        try {
+            data = response.getJSONArray("data");
+            for (int i = 0; i < data.length(); i++) {
+                final JSONObject obj = data.getJSONObject(i);
+                News news = new News();
+                news.assign(obj);
+                result.add(news);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.d("main", String.format("on main thread %b", Looper.getMainLooper().getThread() == Thread.currentThread()));
+        return result;
+    }
+
+    @Override
+    protected void onPostExecute(final List<News> allNews) {
+        long begin = new Date().getTime();
+        Log.d("main", String.format("on main thread %b", Looper.getMainLooper().getThread() == Thread.currentThread()));
+        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                for (News news : allNews) {
+                    realm.copyToRealmOrUpdate(news);
+                }
+            }
+        });
+
+        parent.swipeRefreshLayout.setRefreshing(false);
+        Log.d("main", String.format("time %d", new Date().getTime() - begin));
+    }
 }

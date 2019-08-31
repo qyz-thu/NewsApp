@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.newsapp.model.News;
 
+import java.util.Date;
+
 import io.realm.RealmRecyclerViewAdapter;
 import io.realm.RealmResults;
 
@@ -22,6 +24,7 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
 
     NewsListAdapter(RealmResults<News> list, MainActivity parent) {
         super(list, true, true);
+        setHasStableIds(true);
         this.parent = parent;
     }
 
@@ -44,7 +47,12 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
                 Glide.with(parent).load(resourceId).centerInside().into(holder.imageView);
             }
         }
-        holder.timeView.setText(DateUtils.getRelativeTimeSpanString(news.publishTime.getTime()));
+        holder.timeView.setText(DateUtils.getRelativeTimeSpanString(news.publishTime.getTime(), new Date().getTime(), DateUtils.HOUR_IN_MILLIS));
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return this.getItem(position).newsID.hashCode();
     }
 
 
