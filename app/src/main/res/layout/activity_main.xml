@@ -41,9 +41,10 @@
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="left"
+        android:layout_gravity="start"
         app:headerLayout="@layout/main_nav_header"
-        app:menu="@menu/main_menu">
+        app:menu="@menu/main_menu"
+        android:theme="@style/DrawerTextTheme">
 
     </com.google.android.material.navigation.NavigationView>
 

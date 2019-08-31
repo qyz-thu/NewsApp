@@ -6,16 +6,46 @@
         </item>
         <item android:id="@+id/nav_cat" android:title="@string/categories">
             <menu>
-                <item android:title="@string/entertainment" android:id="@+id/nav_entertainment"></item>
-                <item android:title="@string/military" android:id="@+id/nav_military"></item>
-                <item android:title="@string/education" android:id="@+id/nav_education"></item>
-                <item android:title="@string/culture" android:id="@+id/nav_culture"></item>
-                <item android:title="@string/health" android:id="@+id/nav_health"></item>
-                <item android:title="@string/finance" android:id="@+id/nav_finance"></item>
-                <item android:title="@string/sports" android:id="@+id/nav_sports"></item>
-                <item android:title="@string/car" android:id="@+id/nav_car"></item>
-                <item android:title="@string/tech" android:id="@+id/nav_tech"></item>
-                <item android:title="@string/society" android:id="@+id/nav_society"></item>
+                <item
+                    android:title="@string/entertainment" android:id="@+id/nav_entertainment"
+                    android:icon="@drawable/entertainment">
+                </item>
+                <item
+                    android:title="@string/military" android:id="@+id/nav_military"
+                    android:icon="@drawable/military">
+                </item>
+                <item
+                    android:title="@string/education" android:id="@+id/nav_education"
+                    android:icon="@drawable/education">
+                </item>
+                <item
+                    android:title="@string/culture" android:id="@+id/nav_culture"
+                    android:icon="@drawable/culture">
+                </item>
+                <item
+                    android:title="@string/health" android:id="@+id/nav_health"
+                    android:icon="@drawable/health">
+                </item>
+                <item
+                    android:title="@string/finance" android:id="@+id/nav_finance"
+                    android:icon="@drawable/finance">
+                </item>
+                <item
+                    android:title="@string/sports" android:id="@+id/nav_sports"
+                    android:icon="@drawable/sports">
+                </item>
+                <item
+                    android:title="@string/car" android:id="@+id/nav_car"
+                    android:icon="@drawable/car">
+                </item>
+                <item
+                    android:title="@string/tech" android:id="@+id/nav_tech"
+                    android:icon="@drawable/tech">
+                </item>
+                <item
+                    android:title="@string/society" android:id="@+id/nav_society"
+                    android:icon="@drawable/society">
+                </item>
 
             </menu>
         </item>

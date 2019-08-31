@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -52,23 +53,26 @@ public class MainActivity extends Activity {
     SwipeRefreshLayout swipeRefreshLayout;
     Date lastFetch;
     String category;
+    private boolean isDay=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // dark mode
         final SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-        if (sharedPreferences.getBoolean("darkMode", false)) {
-            setTheme(R.style.AppThemeDark);
-        }
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
+        // dark mode
+        final Button shiftMode = findViewById(R.id.colored_elephant);
+        if (sharedPreferences.getBoolean("darkMode", false)) {
+            setTheme(R.style.AppThemeDark);
+            shiftMode.setBackgroundResource(R.drawable.night);
+        }
         realm = Realm.getDefaultInstance();
 
-        Button coloredElephant = findViewById(R.id.colored_elephant);
-        coloredElephant.setOnClickListener(new View.OnClickListener() {
+
+        shiftMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 SharedPreferences.Editor pref = sharedPreferences.edit();

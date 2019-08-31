@@ -12,15 +12,16 @@
         android:layout_height="wrap_content"
         android:text="@string/app_name"
         android:textColor="@color/colorAccent"
-        android:textSize="34sp"
-        android:layout_gravity="center"
+        android:textSize="40sp"
+        android:layout_gravity="start"
         />
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="30sp"
+        android:layout_height="30sp"
+        android:layout_marginStart="30dp"
         android:gravity="end"
         android:id="@+id/colored_elephant"
-        android:background="@drawable/colored_elephant"
+        android:background="@drawable/day"
         />
 
 </LinearLayout>
