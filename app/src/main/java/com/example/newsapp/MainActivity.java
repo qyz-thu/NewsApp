@@ -95,6 +95,7 @@ public class MainActivity extends Activity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemViewCacheSize(20);
         final LinearLayoutManager manager = new LinearLayoutManager(this);
+        manager.setItemPrefetchEnabled(true);
         recyclerView.setLayoutManager(manager);
         RealmResults<News> results = realm.where(News.class).findAllAsync().sort("publishTime", Sort.DESCENDING);
         recyclerView.setAdapter(adapter = new NewsListAdapter(results, this));
@@ -104,7 +105,7 @@ public class MainActivity extends Activity {
                 super.onScrollStateChanged(recyclerView, newState);
                 int last = manager.findLastVisibleItemPosition();
 
-                if (last < adapter.getItemCount() && (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount())) {
+                if (last >= 0 && last < adapter.getItemCount() && (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount())) {
                     Date publishTime = adapter.getItem(last).publishTime;
                     publishTime.setTime(publishTime.getTime() - 1);
                     fetchData(publishTime);
@@ -164,7 +165,12 @@ public class MainActivity extends Activity {
                         break;
                 }
                 fetchData(null);
-                RealmResults<News> results = realm.where(News.class).equalTo("category", category).findAllAsync().sort("publishTime", Sort.DESCENDING);
+                RealmResults<News> results;
+                if (category.length() > 0) {
+                    results = realm.where(News.class).equalTo("category", category).findAllAsync().sort("publishTime", Sort.DESCENDING);
+                } else {
+                    results = realm.where(News.class).findAllAsync().sort("publishTime", Sort.DESCENDING);
+                }
                 adapter.updateData(results);
                 drawerLayout.closeDrawers();
                 return true;
@@ -186,7 +192,7 @@ public class MainActivity extends Activity {
         lastFetch = endDate;
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd%20HH:mm:ss", Locale.CHINA);
-        String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=15&endDate=%s&words=&categories=%s", format.format(endDate), category);
+        String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=50&endDate=%s&words=&categories=%s", format.format(endDate), category);
         Log.d("Main", url);
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -232,7 +238,7 @@ class FetchDataTask extends AsyncTask<JSONObject, Integer, List<News>> {
 
     @Override
     protected void onPostExecute(final List<News> allNews) {
-        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+        Realm.getDefaultInstance().executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 for (News news : allNews) {
