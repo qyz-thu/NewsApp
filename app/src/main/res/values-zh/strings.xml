@@ -3,4 +3,14 @@
     <string name="app_name">Elephant News</string>
     <string name="categories">分类</string>
     <string name="home">主页</string>
+    <string name="entertainment">娱乐</string>
+    <string name="car">汽车</string>
+    <string name="culture">文化</string>
+    <string name="education">教育</string>
+    <string name="finance">财经</string>
+    <string name="health">教育</string>
+    <string name="military">军事</string>
+    <string name="society">社会</string>
+    <string name="sports">体育</string>
+    <string name="tech">科技</string>
 </resources>

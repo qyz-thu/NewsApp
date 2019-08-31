@@ -5,7 +5,19 @@
 
         </item>
         <item android:id="@+id/nav_cat" android:title="@string/categories">
+            <menu>
+                <item android:title="@string/entertainment" android:id="@+id/nav_entertainment"></item>
+                <item android:title="@string/military" android:id="@+id/nav_military"></item>
+                <item android:title="@string/education" android:id="@+id/nav_education"></item>
+                <item android:title="@string/culture" android:id="@+id/nav_culture"></item>
+                <item android:title="@string/health" android:id="@+id/nav_health"></item>
+                <item android:title="@string/finance" android:id="@+id/nav_finance"></item>
+                <item android:title="@string/sports" android:id="@+id/nav_sports"></item>
+                <item android:title="@string/car" android:id="@+id/nav_car"></item>
+                <item android:title="@string/tech" android:id="@+id/nav_tech"></item>
+                <item android:title="@string/society" android:id="@+id/nav_society"></item>
 
+            </menu>
         </item>
     </group>
 

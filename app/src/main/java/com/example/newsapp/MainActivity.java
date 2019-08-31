@@ -8,11 +8,15 @@ import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -24,6 +28,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.newsapp.model.News;
+import com.google.android.material.navigation.NavigationView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,6 +51,7 @@ public class MainActivity extends Activity {
     Realm realm;
     SwipeRefreshLayout swipeRefreshLayout;
     Date lastFetch;
+    String category;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,12 +67,10 @@ public class MainActivity extends Activity {
 
         realm = Realm.getDefaultInstance();
 
-        TextView titleText = findViewById(R.id.title_text);
-        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Lato-Regular.ttf");
-        titleText.setTypeface(tf);
-        titleText.setOnLongClickListener(new View.OnLongClickListener() {
+        Button coloredElephant = findViewById(R.id.colored_elephant);
+        coloredElephant.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onLongClick(View view) {
+            public void onClick(View view) {
                 SharedPreferences.Editor pref = sharedPreferences.edit();
                 pref.putBoolean("darkMode", !sharedPreferences.getBoolean("darkMode", false));
                 pref.apply();
@@ -74,9 +78,12 @@ public class MainActivity extends Activity {
                 Intent intent = new Intent(MainActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
-                return false;
             }
         });
+
+        TextView titleText = findViewById(R.id.title_text);
+        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Lato-Regular.ttf");
+        titleText.setTypeface(tf);
 
         queue = Volley.newRequestQueue(this);
 
@@ -93,7 +100,7 @@ public class MainActivity extends Activity {
                 super.onScrollStateChanged(recyclerView, newState);
                 int last = manager.findLastVisibleItemPosition();
 
-                if (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount()) {
+                if (last < adapter.getItemCount() && (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount())) {
                     Date publishTime = adapter.getItem(last).publishTime;
                     publishTime.setTime(publishTime.getTime() - 1);
                     fetchData(publishTime);
@@ -106,6 +113,57 @@ public class MainActivity extends Activity {
             @Override
             public void onRefresh() {
                 fetchData(null);
+            }
+        });
+
+        final DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close);
+        drawerLayout.addDrawerListener(toggle);
+
+        final NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.nav_entertainment:
+                        category = "娱乐";
+                        break;
+                    case R.id.nav_military:
+                        category = "军事";
+                        break;
+                    case R.id.nav_education:
+                        category = "教育";
+                        break;
+                    case R.id.nav_culture:
+                        category = "文化";
+                        break;
+                    case R.id.nav_health:
+                        category = "健康";
+                        break;
+                    case R.id.nav_finance:
+                        category = "财经";
+                        break;
+                    case R.id.nav_sports:
+                        category = "体育";
+                        break;
+                    case R.id.nav_car:
+                        category = "汽车";
+                        break;
+                    case R.id.nav_tech:
+                        category = "科技";
+                        break;
+                    case R.id.nav_society:
+                        category = "社会";
+                        break;
+                    default:
+                        category = "";
+                        break;
+                }
+                fetchData(null);
+                RealmResults<News> results = realm.where(News.class).equalTo("category", category).findAllAsync().sort("publishTime", Sort.DESCENDING);
+                adapter.updateData(results);
+                drawerLayout.closeDrawers();
+                return true;
             }
         });
 
@@ -124,7 +182,7 @@ public class MainActivity extends Activity {
         lastFetch = endDate;
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd%20HH:mm:ss", Locale.CHINA);
-        String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=15&endDate=%s&words=&categories=", format.format(endDate));
+        String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=15&endDate=%s&words=&categories=%s", format.format(endDate), category);
         Log.d("Main", url);
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
