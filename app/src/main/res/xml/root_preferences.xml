@@ -17,14 +17,17 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <CheckBoxPreference
         android:defaultValue="false"
+        android:icon="@drawable/ic_dark_mode"
         android:key="darkMode"
         android:title="@string/dark_mode">
 
     </CheckBoxPreference>
     <MultiSelectListPreference
         android:defaultValue="@array/categories_value"
+        android:dialogIcon="@drawable/ic_category"
         android:entries="@array/categories_name"
         android:entryValues="@array/categories_value"
+        android:icon="@drawable/ic_category"
         android:key="categories"
         android:title="@string/categories" />
 </androidx.preference.PreferenceScreen>
