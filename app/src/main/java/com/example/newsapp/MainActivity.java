@@ -1,7 +1,6 @@
 package com.example.newsapp;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -17,7 +16,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -41,7 +39,6 @@ import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -63,6 +60,7 @@ public class MainActivity extends Activity {
 
     Date lastFetch;
     String category;
+    List<Category> allCategories;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +76,18 @@ public class MainActivity extends Activity {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+
+        allCategories = new ArrayList<>();
+        allCategories.add(new Category(R.id.nav_entertainment, "entertainment", "娱乐"));
+        allCategories.add(new Category(R.id.nav_military, "military", "军事"));
+        allCategories.add(new Category(R.id.nav_education, "education", "教育"));
+        allCategories.add(new Category(R.id.nav_culture, "culture", "文化"));
+        allCategories.add(new Category(R.id.nav_health, "health", "健康"));
+        allCategories.add(new Category(R.id.nav_finance, "finance", "财经"));
+        allCategories.add(new Category(R.id.nav_sports, "sports", "体育"));
+        allCategories.add(new Category(R.id.nav_car, "car", "汽车"));
+        allCategories.add(new Category(R.id.nav_tech, "tech", "科技"));
+        allCategories.add(new Category(R.id.nav_society, "society", "社会"));
 
         realm = Realm.getDefaultInstance();
 
@@ -134,49 +144,22 @@ public class MainActivity extends Activity {
         drawerLayout.addDrawerListener(toggle);
 
         navigationView = findViewById(R.id.nav_view);
-
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.nav_entertainment:
-                        category = "娱乐";
-                        break;
-                    case R.id.nav_military:
-                        category = "军事";
-                        break;
-                    case R.id.nav_education:
-                        category = "教育";
-                        break;
-                    case R.id.nav_culture:
-                        category = "文化";
-                        break;
-                    case R.id.nav_health:
-                        category = "健康";
-                        break;
-                    case R.id.nav_finance:
-                        category = "财经";
-                        break;
-                    case R.id.nav_sports:
-                        category = "体育";
-                        break;
-                    case R.id.nav_car:
-                        category = "汽车";
-                        break;
-                    case R.id.nav_tech:
-                        category = "科技";
-                        break;
-                    case R.id.nav_society:
-                        category = "社会";
-                        break;
-                    case R.id.nav_pref:
-                        Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                        startActivity(intent);
-                        return true;
-                    default:
-                        category = "";
-                        break;
+                if (item.getItemId() == R.id.nav_pref) {
+                    Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                    startActivity(intent);
+                    return true;
                 }
+                category = "";
+                for (Category cat : allCategories) {
+                    if (item.getItemId() == cat.navigationId) {
+                        category = cat.chineseName;
+                        break;
+                    }
+                }
+
                 fetchData(null);
                 RealmResults<News> results;
                 if (category.length() > 0) {
@@ -202,36 +185,8 @@ public class MainActivity extends Activity {
         Set<String> enabledCategories = sharedPreferences.getStringSet("categories", null);
         Menu menu = navigationView.getMenu();
 
-        // TODO: use a loop
-        if (enabledCategories != null && !enabledCategories.contains("entertainment")) {
-            menu.findItem(R.id.nav_entertainment).setEnabled(false);
-        }
-        if (enabledCategories != null && !enabledCategories.contains("military")) {
-            menu.findItem(R.id.nav_military).setEnabled(false);
-        }
-        if (enabledCategories != null && !enabledCategories.contains("education")) {
-            menu.findItem(R.id.nav_education).setEnabled(false);
-        }
-        if (enabledCategories != null && !enabledCategories.contains("culture")) {
-            menu.findItem(R.id.nav_culture).setEnabled(false);
-        }
-        if (enabledCategories != null && !enabledCategories.contains("health")) {
-            menu.findItem(R.id.nav_health).setEnabled(false);
-        }
-        if (enabledCategories != null && !enabledCategories.contains("finance")) {
-            menu.findItem(R.id.nav_finance).setEnabled(false);
-        }
-        if (enabledCategories != null && !enabledCategories.contains("sports")) {
-            menu.findItem(R.id.nav_sports).setEnabled(false);
-        }
-        if (enabledCategories != null && !enabledCategories.contains("car")) {
-            menu.findItem(R.id.nav_car).setEnabled(false);
-        }
-        if (enabledCategories != null && !enabledCategories.contains("tech")) {
-            menu.findItem(R.id.nav_tech).setEnabled(false);
-        }
-        if (enabledCategories != null && !enabledCategories.contains("society")) {
-            menu.findItem(R.id.nav_society).setEnabled(false);
+        for (Category cat : allCategories) {
+            menu.findItem(cat.navigationId).setVisible(enabledCategories == null || enabledCategories.contains(cat.name));
         }
 
         boolean newDarkMode = sharedPreferences.getBoolean("darkMode", false);
@@ -321,5 +276,17 @@ class FetchDataTask extends AsyncTask<JSONObject, Integer, List<News>> {
         if (layout != null) {
             layout.setRefreshing(false);
         }
+    }
+}
+
+class Category {
+    int navigationId;
+    String name;
+    String chineseName;
+
+    Category(int navigationId, String name, String chineseName) {
+        this.navigationId = navigationId;
+        this.name = name;
+        this.chineseName = chineseName;
     }
 }
