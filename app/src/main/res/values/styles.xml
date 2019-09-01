@@ -33,6 +33,21 @@
 
     <style name="NewsDetailTheme" parent="Theme.AppCompat.Light">
         <item name="actionBarSize">40dp</item>
+        <item name="colorPrimary">@color/colorPrimaryDark</item>
+    </style>
+
+    <style name="PreferenceTheme" parent="Theme.AppCompat">
+        <item name="actionBarSize">40dp</item>
+        <item name="colorPrimary">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryDark">@color/white</item>
+    </style>
+
+    <style name="actionBar" parent="Theme.AppCompat.Light">
+        <item name="android:titleTextStyle">@style/actionBar.textStyle</item>
+    </style>
+
+    <style name="actionBar.textStyle" parent="Theme.AppCompat.Light">
+        <item name="android:textColor">@color/colorPrimary</item>
     </style>
 
 </resources>

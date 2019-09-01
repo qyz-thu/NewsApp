@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#DC143C</color>
-    <color name="colorPrimaryDark">#CAD1DB</color>
+    <color name="colorPrimary">#DC1414</color>
+    <color name="colorPrimaryDark">#9CA6B3</color>
     <color name="colorAccent">#ECE8E9</color>
     <color name="colorButton">#04D723</color>
-    <color name="colorText">#00572F</color>
+    <color name="colorText">#616961</color>
+    <color name="colorNewsTitle">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="blue">#3D5AFE</color>
 </resources>
