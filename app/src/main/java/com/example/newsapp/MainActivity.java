@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -51,15 +50,12 @@ import io.realm.Sort;
 public class MainActivity extends Activity {
     RequestQueue queue;
     Realm realm;
-
     NewsListAdapter adapter;
     SwipeRefreshLayout swipeRefreshLayout;
     NavigationView navigationView;
     SharedPreferences sharedPreferences;
     Button shiftMode;
     boolean darkMode;
-    static News detailedNews;
-
     Date lastFetch;
     String category;
     List<Category> allCategories;
@@ -118,17 +114,14 @@ public class MainActivity extends Activity {
         manager.setItemPrefetchEnabled(true);
         recyclerView.setLayoutManager(manager);
         RealmResults<News> results = realm.where(News.class).findAllAsync().sort("publishTime", Sort.DESCENDING);
+        Log.d("MainActivity", results.asJSON());
         recyclerView.setAdapter(adapter = new NewsListAdapter(results, this));
         adapter.setOnItemClickListener(new NewsListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                //TODO: create new activity
-                detailedNews = adapter.getItem(position);
+                News news = adapter.getItem(position);
                 Intent intent = new Intent(MainActivity.this, NewsDetailActivity.class);
-                intent.putExtra("id", detailedNews==null? "":detailedNews.newsID);
-//                Bundle bundle = new Bundle();
-//                bundle.putSerializable("news", news);
-//                intent.putExtras(bundle);
+                intent.putExtra("id", news == null ? "" : news.newsID);
                 startActivity(intent);
             }
         });

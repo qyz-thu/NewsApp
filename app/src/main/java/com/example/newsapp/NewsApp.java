@@ -22,6 +22,7 @@ public class NewsApp extends Application {
         try {
             Realm.getInstance(config);
         } catch (RealmMigrationNeededException e){
+            Log.w("main", "Cleaning realm db");
             Realm.deleteRealm(config);
         }
 

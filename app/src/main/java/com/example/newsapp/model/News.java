@@ -40,10 +40,13 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
     public RealmList<PairDoubleString> keywords;
     public RealmList<PairDoubleString> who;
 
+    public boolean isRead;
+
     public News() {
     }
 
     public void assign(JSONObject json) {
+        this.isRead = false;
         this.lang = json.optString("language");
         this.video = json.optString("video");
         this.title = json.optString("title");

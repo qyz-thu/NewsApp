@@ -53,6 +53,12 @@ public class NewsDetailActivity extends AppCompatActivity {
             if (news.images != null && news.images.size() > 0) {
                 Glide.with(this).load(news.images.get(0)).into(image_view);
             }
+
+            if (!news.isRead) {
+                realm.beginTransaction();
+                news.isRead = true;
+                realm.commitTransaction();
+            }
         }
 
     }
