@@ -10,10 +10,10 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:layout_marginStart="10dp"
-        android:text="My Account"
-        android:textSize="20sp"/>
+        android:layout_weight="1"
+        android:text="@string/my_account"
+        android:textSize="20sp" />
 
 
     <com.example.newsapp.view.CircularView

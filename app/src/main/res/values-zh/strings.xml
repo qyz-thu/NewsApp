@@ -13,4 +13,22 @@
     <string name="society">社会</string>
     <string name="sports">体育</string>
     <string name="tech">科技</string>
+    <string name="close">关闭</string>
+    <string name="open">打开</string>
+    <string name="preferences">设置</string>
+    <string name="dark_mode">夜间模式</string>
+    <string name="style">样式</string>
+    <string-array name="categories_name">
+        <item>娱乐</item>
+        <item>军事</item>
+        <item>教育</item>
+        <item>文化</item>
+        <item>健康</item>
+        <item>财经</item>
+        <item>体验</item>
+        <item>汽车</item>
+        <item>科技</item>
+        <item>社会</item>
+    </string-array>
+    <string name="my_account">我的帐号</string>
 </resources>

@@ -2,16 +2,44 @@
     <string name="app_name">Elephant News</string>
     <string name="home">Home</string>
     <string name="categories">Categories</string>
-    <string name="entertainment" >Entertainment</string>
-    <string name="military" >Military</string>
-    <string name="education" >Education</string>
-    <string name="culture" >Culture</string>
-    <string name="health" >Health</string>
-    <string name="finance" >Finance</string>
-    <string name="sports" >Sports</string>
-    <string name="car" >Car</string>
-    <string name="tech" >Tech</string>
-    <string name="society" >Society</string>
+    <string name="entertainment">Entertainment</string>
+    <string name="military">Military</string>
+    <string name="education">Education</string>
+    <string name="culture">Culture</string>
+    <string name="health">Health</string>
+    <string name="finance">Finance</string>
+    <string name="sports">Sports</string>
+    <string name="car">Car</string>
+    <string name="tech">Tech</string>
+    <string name="society">Society</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
+    <string name="preferences">Preferences</string>
+    <string name="style">Style</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="my_account">My Account</string>
+    <string-array name="categories_name">
+        <item>Entertainment</item>
+        <item>Military</item>
+        <item>Education</item>
+        <item>Culture</item>
+        <item>Health</item>
+        <item>Finance</item>
+        <item>Sports</item>
+        <item>Car</item>
+        <item>Tech</item>
+        <item>Society</item>
+    </string-array>
+    <string-array name="categories_value">
+        <item>entertainment</item>
+        <item>military</item>
+        <item>education</item>
+        <item>culture</item>
+        <item>health</item>
+        <item>finance</item>
+        <item>sports</item>
+        <item>car</item>
+        <item>tech</item>
+        <item>society</item>
+    </string-array>
 </resources>

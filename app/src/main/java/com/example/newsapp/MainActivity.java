@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -18,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -39,50 +41,55 @@ import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
 public class MainActivity extends Activity {
-    NewsListAdapter adapter;
     RequestQueue queue;
     Realm realm;
+
+    NewsListAdapter adapter;
     SwipeRefreshLayout swipeRefreshLayout;
+    NavigationView navigationView;
+    SharedPreferences sharedPreferences;
+    Button shiftMode;
+    boolean darkMode;
+
     Date lastFetch;
     String category;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         // dark mode
-        if (sharedPreferences.getBoolean("darkMode", false)) {
+        darkMode = sharedPreferences.getBoolean("darkMode", false);
+        if (darkMode) {
+            Log.d("MainActivity", "dark mode enabled");
             setTheme(R.style.AppThemeDark);
         }
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-        final Button shiftMode = findViewById(R.id.shift_mode);
-        if (sharedPreferences.getBoolean("darkMode", false)) {
-            shiftMode.setBackgroundResource(R.drawable.night);
-
-        }
 
         realm = Realm.getDefaultInstance();
 
+        shiftMode = findViewById(R.id.shift_mode);
         shiftMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 SharedPreferences.Editor pref = sharedPreferences.edit();
-                pref.putBoolean("darkMode", !sharedPreferences.getBoolean("darkMode", false));
+                pref.putBoolean("darkMode", !darkMode);
                 pref.apply();
 
-                Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
+                reload();
             }
         });
 
@@ -126,7 +133,8 @@ public class MainActivity extends Activity {
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close);
         drawerLayout.addDrawerListener(toggle);
 
-        final NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
+
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -161,6 +169,10 @@ public class MainActivity extends Activity {
                     case R.id.nav_society:
                         category = "社会";
                         break;
+                    case R.id.nav_pref:
+                        Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                        startActivity(intent);
+                        return true;
                     default:
                         category = "";
                         break;
@@ -178,7 +190,64 @@ public class MainActivity extends Activity {
             }
         });
 
-        fetchData(null);
+        if (adapter.getItemCount() < 50) {
+            fetchData(null);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        Set<String> enabledCategories = sharedPreferences.getStringSet("categories", null);
+        Menu menu = navigationView.getMenu();
+
+        // TODO: use a loop
+        if (enabledCategories != null && !enabledCategories.contains("entertainment")) {
+            menu.findItem(R.id.nav_entertainment).setEnabled(false);
+        }
+        if (enabledCategories != null && !enabledCategories.contains("military")) {
+            menu.findItem(R.id.nav_military).setEnabled(false);
+        }
+        if (enabledCategories != null && !enabledCategories.contains("education")) {
+            menu.findItem(R.id.nav_education).setEnabled(false);
+        }
+        if (enabledCategories != null && !enabledCategories.contains("culture")) {
+            menu.findItem(R.id.nav_culture).setEnabled(false);
+        }
+        if (enabledCategories != null && !enabledCategories.contains("health")) {
+            menu.findItem(R.id.nav_health).setEnabled(false);
+        }
+        if (enabledCategories != null && !enabledCategories.contains("finance")) {
+            menu.findItem(R.id.nav_finance).setEnabled(false);
+        }
+        if (enabledCategories != null && !enabledCategories.contains("sports")) {
+            menu.findItem(R.id.nav_sports).setEnabled(false);
+        }
+        if (enabledCategories != null && !enabledCategories.contains("car")) {
+            menu.findItem(R.id.nav_car).setEnabled(false);
+        }
+        if (enabledCategories != null && !enabledCategories.contains("tech")) {
+            menu.findItem(R.id.nav_tech).setEnabled(false);
+        }
+        if (enabledCategories != null && !enabledCategories.contains("society")) {
+            menu.findItem(R.id.nav_society).setEnabled(false);
+        }
+
+        boolean newDarkMode = sharedPreferences.getBoolean("darkMode", false);
+        shiftMode.setBackgroundResource(newDarkMode ? R.drawable.night : R.drawable.day);
+
+        // pref changed
+        if (darkMode != newDarkMode) {
+            darkMode = newDarkMode;
+            reload();
+        }
+    }
+
+    void reload() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     void fetchData(Date endDate) {

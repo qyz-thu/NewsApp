@@ -7,7 +7,9 @@
         <item name="windowActionBar">true</item>
         <item name="android:actionBarSize">50dp</item>
         <item name="android:layout_centerInParent">true</item>
+        <!--
         <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+        -->
     </style>
 
     <style name="AppThemeDark" parent="@style/Theme.MaterialComponents">
@@ -15,7 +17,9 @@
         <item name="windowActionBar">true</item>
         <item name="android:actionBarSize">50dp</item>
         <item name="android:layout_centerInParent">true</item>
+        <!--
         <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+        -->
     </style>
 
     <style name="WindowAnimationTransition">
