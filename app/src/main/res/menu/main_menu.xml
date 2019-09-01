@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group>
-        <item android:id="@+id/nav_home" android:title="@string/home">
-
+    <group android:id="@+id/nav_group">
+        <item android:id="@+id/nav_home" android:title="@string/home" android:icon="@drawable/ic_home">
         </item>
         <item android:id="@+id/nav_cat" android:title="@string/categories">
             <menu>
@@ -49,9 +48,14 @@
 
             </menu>
         </item>
-        <item android:id="@+id/nav_pref" android:title="@string/preferences">
+        <group>
+            <item
+                android:id="@+id/nav_pref"
+                android:icon="@drawable/ic_settings"
+                android:title="@string/preferences">
 
-        </item>
+            </item>
+        </group>
     </group>
 
 </menu>
