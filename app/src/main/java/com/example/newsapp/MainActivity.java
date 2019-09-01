@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -57,6 +58,7 @@ public class MainActivity extends Activity {
     SharedPreferences sharedPreferences;
     Button shiftMode;
     boolean darkMode;
+    static News detailedNews;
 
     Date lastFetch;
     String category;
@@ -117,6 +119,19 @@ public class MainActivity extends Activity {
         recyclerView.setLayoutManager(manager);
         RealmResults<News> results = realm.where(News.class).findAllAsync().sort("publishTime", Sort.DESCENDING);
         recyclerView.setAdapter(adapter = new NewsListAdapter(results, this));
+        adapter.setOnItemClickListener(new NewsListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                //TODO: create new activity
+                detailedNews = adapter.getItem(position);
+                Intent intent = new Intent(MainActivity.this, NewsDetailActivity.class);
+                intent.putExtra("id", detailedNews==null? "":detailedNews.newsID);
+//                Bundle bundle = new Bundle();
+//                bundle.putSerializable("news", news);
+//                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -176,6 +191,7 @@ public class MainActivity extends Activity {
         if (adapter.getItemCount() < 50) {
             fetchData(null);
         }
+
     }
 
     @Override

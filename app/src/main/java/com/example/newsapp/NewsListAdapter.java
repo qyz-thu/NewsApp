@@ -4,6 +4,7 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,6 +23,16 @@ import io.realm.RealmResults;
 public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdapter.ViewHolder> {
 
     MainActivity parent;
+    private OnItemClickListener onItemClickListener;
+
+    public interface OnItemClickListener {
+        void onItemClick(int a);
+    }
+
+    void setOnItemClickListener(OnItemClickListener onItemClickListener)
+    {
+        this.onItemClickListener = onItemClickListener;
+    }
 
     NewsListAdapter(RealmResults<News> list, MainActivity parent) {
         super(list, true, true);
@@ -37,7 +48,7 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
     }
 
     @Override
-    public void onBindViewHolder(@NonNull NewsListAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull NewsListAdapter.ViewHolder holder, final int position) {
         News news = getItem(position);
         holder.titleView.setText(news.title);
         if (!news.images.isEmpty()) {
@@ -48,12 +59,17 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
                 drawable.setCenterRadius(30);
                 drawable.start();
                 Glide.with(parent).load(news.images.get(0)).placeholder(drawable).centerInside().into(holder.imageView);
-            } else {
-                int resourceId = R.drawable.elephant;
-                Glide.with(parent).load(resourceId).centerInside().into(holder.imageView);
             }
+            else
+                Glide.with(parent).load(R.drawable.elephant).centerInside().into(holder.imageView);
         }
         holder.timeView.setText(DateUtils.getRelativeTimeSpanString(news.publishTime.getTime(), new Date().getTime(), DateUtils.HOUR_IN_MILLIS));
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onItemClickListener.onItemClick(position);
+        }
+        });
     }
 
     @Override

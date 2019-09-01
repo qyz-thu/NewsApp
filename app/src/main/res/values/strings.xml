@@ -18,6 +18,7 @@
     <string name="style">Style</string>
     <string name="dark_mode">Dark Mode</string>
     <string name="my_account">My Account</string>
+    <string name="news_detail">News Detail</string>
     <string-array name="categories_name">
         <item>Entertainment</item>
         <item>Military</item>

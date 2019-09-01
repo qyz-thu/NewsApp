@@ -18,6 +18,7 @@
     <string name="preferences">设置</string>
     <string name="dark_mode">夜间模式</string>
     <string name="style">样式</string>
+    <string name="news_detail">详情</string>
     <string-array name="categories_name">
         <item>娱乐</item>
         <item>军事</item>
