@@ -1,5 +1,6 @@
 package com.example.newsapp;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -98,12 +99,46 @@ public class NewsDetailActivity extends AppCompatActivity {
                         @Override
                         public void onBoomButtonClick(int index) {
                             Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, 1000).show();
-                            new FetchImagesTask(NewsDetailActivity.this).execute(new ArrayList(news.images));
+                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(FetchImagesTask.Target.SELECT, news.title, NewsDetailActivity.this);
+                            task.execute(new ArrayList<>(news.images));
                         }
                     });
             bmb.addBuilder(builderImage);
 
-            for (int i = 2; i < bmb.getPiecePlaceEnum().pieceNumber(); i++) {
+            SimpleCircleButton.Builder builderImageQQ = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_qq)
+                    .listener(new OnBMClickListener() {
+                        @Override
+                        public void onBoomButtonClick(int index) {
+                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, 1000).show();
+                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(FetchImagesTask.Target.QQ, news.title, NewsDetailActivity.this);
+                            task.execute(new ArrayList<>(news.images));
+                        }
+                    });
+            bmb.addBuilder(builderImageQQ);
+
+            SimpleCircleButton.Builder builderImageWechat = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_qq)
+                    .listener(new OnBMClickListener() {
+                        @Override
+                        public void onBoomButtonClick(int index) {
+                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, 1000).show();
+                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(FetchImagesTask.Target.WECHAT, news.title, NewsDetailActivity.this);
+                            task.execute(new ArrayList<>(news.images));
+                        }
+                    });
+            bmb.addBuilder(builderImageWechat);
+
+            SimpleCircleButton.Builder builderImageWeibo = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_weibo)
+                    .listener(new OnBMClickListener() {
+                        @Override
+                        public void onBoomButtonClick(int index) {
+                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, 1000).show();
+                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(FetchImagesTask.Target.WEIBO, news.title, NewsDetailActivity.this);
+                            task.execute(new ArrayList<>(news.images));
+                        }
+                    });
+            bmb.addBuilder(builderImageWeibo);
+
+            for (int i = 5; i < bmb.getPiecePlaceEnum().pieceNumber(); i++) {
                 SimpleCircleButton.Builder builder = new SimpleCircleButton.Builder().normalImageRes(R.drawable.elephant);
                 bmb.addBuilder(builder);
             }
@@ -150,8 +185,13 @@ public class NewsDetailActivity extends AppCompatActivity {
 class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> {
     private Context context;
 
-    FetchImagesTask(Context context) {
+    private Target target;
+    private String desc;
+
+    FetchImagesTask(Target target, String desc, Context context) {
+        this.desc = desc;
         this.context = context;
+        this.target = target;
     }
 
     @Override
@@ -175,10 +215,40 @@ class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Ur
 
     @Override
     protected void onPostExecute(final ArrayList<Uri> results) {
+        // ref: https://github.com/YaphetZhao/ShareAnywhere/blob/master/library_shareanywhere/src/main/java/com/yaphetzhao/library_shareanywhere/ShareAnyWhereUtil.java
         Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         intent.setType("image/*");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, results);
-        context.startActivity(Intent.createChooser(intent, "分享新闻图片"));
+        intent.putExtra("Kdescription", desc);
+
+        switch (target) {
+            case WECHAT:
+                intent.setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.tools.ShareImgUI"));
+                break;
+            case MOMENTS:
+                intent.setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.tools.ShareToTimeLineUI"));
+                break;
+            case QQ:
+                intent.setComponent(new ComponentName("com.tencent.mobileqq", "com.tencent.mobileqq.activity.JumpActivity"));
+                break;
+            case WEIBO:
+                intent.setPackage("com.sina.weibo");
+                break;
+        }
+        if (target == Target.SELECT) {
+            context.startActivity(Intent.createChooser(intent, "分享新闻图片"));
+        } else {
+            context.startActivity(intent);
+        }
+    }
+
+    enum Target {
+        SELECT,
+        WECHAT,
+        MOMENTS,
+        WEIBO,
+        QQ
     }
 }
 
