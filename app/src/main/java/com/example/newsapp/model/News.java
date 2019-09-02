@@ -29,6 +29,7 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
     public String content;
     public String publisher;
     public String category;
+    public String url;
 
     @Index
     public Date publishTime;
@@ -56,6 +57,8 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
         this.publisher = json.optString("publisher");
         this.category = json.optString("category");
         this.newsID = json.optString("newsID");
+        this.video = json.optString("video");
+        this.url = json.optString("url");
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         try {
             this.publishTime = format.parse(json.optString("publishTime"));
@@ -83,6 +86,7 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
         } catch (JSONException e) {
             // ignore
         }
+
         this.keywords = new RealmList<>();
         try {
             JSONArray keywords = json.getJSONArray("keywords");

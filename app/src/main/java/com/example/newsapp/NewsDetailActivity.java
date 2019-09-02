@@ -118,7 +118,17 @@ public class NewsDetailActivity extends AppCompatActivity {
 
             bmb.addBuilder(buildSharingButton(R.drawable.ic_weibo, FetchImagesTask.Target.WEIBO));
 
-            for (int i = 6; i < bmb.getPiecePlaceEnum().pieceNumber(); i++) {
+            SimpleCircleButton.Builder builderImageBrowser = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_browse)
+                    .listener(new OnBMClickListener() {
+                        @Override
+                        public void onBoomButtonClick(int index) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(news.url));
+                            startActivity(intent);
+                        }
+                    });
+            bmb.addBuilder(builderImageBrowser);
+
+            for (int i = 7; i < bmb.getPiecePlaceEnum().pieceNumber(); i++) {
                 SimpleCircleButton.Builder builder = new SimpleCircleButton.Builder().normalImageRes(R.drawable.elephant);
                 bmb.addBuilder(builder);
             }
