@@ -41,8 +41,8 @@ public class NewsDetailActivity extends AppCompatActivity {
         if (news != null) {
             title_view.setText(news.title);
             content_view.setText(news.content);
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            date_view.setText(format.format(news.publishTime));
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ");
+            date_view.setText(format.format(news.publishTime) + news.publisher);
             if (news.images != null && news.images.size() > 0) {
                 Glide.with(this).load(news.images.get(0)).into(image_view);
             }

@@ -44,6 +44,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import io.realm.Realm;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -57,7 +58,7 @@ public class MainActivity extends Activity {
     Button shiftMode;
     boolean darkMode;
     Date lastFetch;
-    String category;
+    String category = "";
     List<Category> allCategories;
 
     @Override
@@ -114,7 +115,6 @@ public class MainActivity extends Activity {
         manager.setItemPrefetchEnabled(true);
         recyclerView.setLayoutManager(manager);
         RealmResults<News> results = realm.where(News.class).findAllAsync().sort("publishTime", Sort.DESCENDING);
-        Log.d("MainActivity", results.asJSON());
         recyclerView.setAdapter(adapter = new NewsListAdapter(results, this));
         adapter.setOnItemClickListener(new NewsListAdapter.OnItemClickListener() {
             @Override
@@ -168,23 +168,27 @@ public class MainActivity extends Activity {
                     }
                 }
 
-                fetchData(null);
-                RealmResults<News> results;
-                if (category.length() > 0) {
-                    results = realm.where(News.class).equalTo("category", category).findAllAsync().sort("publishTime", Sort.DESCENDING);
-                } else {
-                    results = realm.where(News.class).findAllAsync().sort("publishTime", Sort.DESCENDING);
-                }
-                adapter.updateData(results);
+                updateData();
                 drawerLayout.closeDrawers();
                 return true;
             }
         });
 
-        if (adapter.getItemCount() < 50) {
+        updateData();
+    }
+
+    private void updateData() {
+        RealmQuery<News> query;
+        RealmResults<News> results;
+        query = realm.where(News.class);
+        if (category.length() > 0) {
+            query = query.equalTo("category", category);
+        }
+        if (query.count() < 50) {
             fetchData(null);
         }
-
+        results = query.findAllAsync().sort("publishTime", Sort.DESCENDING);
+        adapter.updateData(results);
     }
 
     @Override
