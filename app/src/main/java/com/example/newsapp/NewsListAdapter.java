@@ -25,19 +25,14 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
     MainActivity parent;
     private OnItemClickListener onItemClickListener;
 
-    public interface OnItemClickListener {
-        void onItemClick(int a);
-    }
-
-    void setOnItemClickListener(OnItemClickListener onItemClickListener)
-    {
-        this.onItemClickListener = onItemClickListener;
-    }
-
     NewsListAdapter(RealmResults<News> list, MainActivity parent) {
         super(list, true, true);
         setHasStableIds(true);
         this.parent = parent;
+    }
+
+    void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
     }
 
     @NonNull
@@ -51,9 +46,7 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
     public void onBindViewHolder(@NonNull NewsListAdapter.ViewHolder holder, final int position) {
         News news = getItem(position);
         holder.titleView.setText(news.title);
-        if (!news.isRead) {
-            holder.titleView.setTypeface(holder.titleView.getTypeface(), Typeface.BOLD);
-        }
+        holder.titleView.setTypeface(Typeface.DEFAULT, news.isRead ? Typeface.NORMAL : Typeface.BOLD);
         if (!news.images.isEmpty()) {
             String url = news.images.get(0);
             if (url != null && url.length() > 0) {
@@ -62,8 +55,7 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
                 drawable.setCenterRadius(30);
                 drawable.start();
                 Glide.with(parent).load(news.images.get(0)).placeholder(drawable).centerInside().into(holder.imageView);
-            }
-            else
+            } else
                 Glide.with(parent).load(R.drawable.elephant).centerInside().into(holder.imageView);
         } else {
             Glide.with(parent).load(R.drawable.elephant).centerInside().into(holder.imageView);
@@ -74,7 +66,7 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
             @Override
             public void onClick(View view) {
                 onItemClickListener.onItemClick(position);
-        }
+            }
         });
     }
 
@@ -88,6 +80,9 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
         }
     }
 
+    public interface OnItemClickListener {
+        void onItemClick(int a);
+    }
 
     class ViewHolder extends RecyclerView.ViewHolder {
         View itemView;
