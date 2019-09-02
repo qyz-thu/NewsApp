@@ -7,6 +7,7 @@
     >
 
     <ScrollView
+        android:id="@+id/scrollView2"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -19,13 +20,12 @@
                 android:id="@+id/news_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:layout_marginStart="20dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginEnd="20dp"
                 android:gravity="center"
-                android:textSize="23sp"
                 android:textColor="@color/colorNewsTitle"
-                />
+                android:textSize="23sp" />
 
             <TextView
                 android:id="@+id/news_date"
@@ -33,17 +33,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:gravity="center"
-                android:textSize="12sp"
-                />
+                android:textSize="12sp" />
 
             <androidx.viewpager.widget.ViewPager
                 android:id="@+id/news_images"
                 android:layout_width="match_parent"
-                android:layout_height="250dp" >
+                android:layout_height="250dp">
+
                 <androidx.viewpager.widget.PagerTabStrip
                     android:id="@+id/news_images_strip"
-                    android:layout_height="wrap_content"
                     android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="bottom">
 
                 </androidx.viewpager.widget.PagerTabStrip>
@@ -53,18 +53,30 @@
                 android:id="@+id/news_content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
                 android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="30dp"
-                android:textSize="15sp"
                 android:textColor="@color/colorText"
-                />
+                android:textSize="15sp" />
+
         </LinearLayout>
 
     </ScrollView>
 
+    <com.nightonke.boommenu.BoomMenuButton
+        android:id="@+id/boom_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        app:bmb_buttonEnum="simpleCircle"
+        app:bmb_buttonPlaceEnum="buttonPlace_sc_9_1"
+        app:bmb_piecePlaceEnum="piecePlace_dot_9_1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
+    </com.nightonke.boommenu.BoomMenuButton>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
