@@ -49,6 +49,8 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 
 public class MainActivity extends Activity {
+    private static final String TAG = MainActivity.class.getName();
+
     RequestQueue queue;
     Realm realm;
     NewsListAdapter adapter;
@@ -69,7 +71,7 @@ public class MainActivity extends Activity {
         // dark mode
         darkMode = sharedPreferences.getBoolean("darkMode", false);
         if (darkMode) {
-            Log.d("MainActivity", "dark mode enabled");
+            Log.d(TAG, "dark mode enabled");
             setTheme(R.style.AppThemeDark);
         }
 
@@ -231,7 +233,7 @@ public class MainActivity extends Activity {
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd%20HH:mm:ss", Locale.CHINA);
         String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=50&endDate=%s&words=&categories=%s", format.format(endDate), category);
-        Log.d("Main", url);
+        Log.d(TAG, url);
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
@@ -241,7 +243,7 @@ public class MainActivity extends Activity {
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d("main", "network", error);
+                        Log.d(TAG, "network", error);
                     }
                 });
         queue.add(req);

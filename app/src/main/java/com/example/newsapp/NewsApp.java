@@ -8,6 +8,8 @@ import io.realm.RealmConfiguration;
 import io.realm.exceptions.RealmMigrationNeededException;
 
 public class NewsApp extends Application {
+    private static final String TAG = NewsApp.class.getName();
+
     public NewsApp() {
     }
 
@@ -22,10 +24,10 @@ public class NewsApp extends Application {
         try {
             Realm.getInstance(config);
         } catch (RealmMigrationNeededException e){
-            Log.w("main", "Cleaning realm db");
+            Log.w(TAG, "Cleaning realm db");
             Realm.deleteRealm(config);
         }
 
-        Log.i("main", "Realm init done");
+        Log.i(TAG, "Realm init done");
     }
 }

@@ -65,7 +65,10 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
             }
             else
                 Glide.with(parent).load(R.drawable.elephant).centerInside().into(holder.imageView);
+        } else {
+            Glide.with(parent).load(R.drawable.elephant).centerInside().into(holder.imageView);
         }
+
         holder.timeView.setText(DateUtils.getRelativeTimeSpanString(news.publishTime.getTime(), new Date().getTime(), DateUtils.HOUR_IN_MILLIS));
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

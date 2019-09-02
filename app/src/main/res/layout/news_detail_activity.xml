@@ -36,16 +36,18 @@
                 android:textSize="12sp"
                 />
 
-            <ImageView
-                android:id="@+id/news_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:layout_gravity="center"
-                android:src="@drawable/colored_elephant"
-                />
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/news_images"
+                android:layout_width="match_parent"
+                android:layout_height="250dp" >
+                <androidx.viewpager.widget.PagerTabStrip
+                    android:id="@+id/news_images_strip"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="bottom">
+
+                </androidx.viewpager.widget.PagerTabStrip>
+            </androidx.viewpager.widget.ViewPager>
 
             <TextView
                 android:id="@+id/news_content"

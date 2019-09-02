@@ -69,10 +69,15 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
 
         this.images = new RealmList<>();
         try {
-            String images = json.getString("image");
+            String images = json.getString("image").trim();
             images = images.replaceAll("[\\[\\]]", "");
             String[] urls = images.split(",");
-            this.images.addAll(Arrays.asList(urls));
+            for (String url : urls) {
+                String trimmed = url.trim();
+                if (trimmed.length() > 0) {
+                    this.images.add(trimmed);
+                }
+            }
         } catch (JSONException e) {
             // ignore
         }
