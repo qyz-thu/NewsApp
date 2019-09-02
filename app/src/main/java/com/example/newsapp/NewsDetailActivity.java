@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,11 +26,19 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.Glide;
+import com.example.newsapp.model.Location;
 import com.example.newsapp.model.News;
 import com.nightonke.boommenu.BoomButtons.BoomButton;
 import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
 import com.nightonke.boommenu.BoomButtons.SimpleCircleButton;
 import com.nightonke.boommenu.BoomMenuButton;
+
+import org.osmdroid.api.IMapController;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.CustomZoomButtonsController;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.GroundOverlay2;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,6 +56,7 @@ public class NewsDetailActivity extends AppCompatActivity {
     TextView content_view;
     TextView date_view;
     ViewPager viewPager;
+    MapView mapView;
 
     News news;
 
@@ -59,6 +71,36 @@ public class NewsDetailActivity extends AppCompatActivity {
         content_view = findViewById(R.id.news_content);
         date_view = findViewById(R.id.news_date);
         viewPager = findViewById(R.id.news_images);
+
+        mapView = findViewById(R.id.map_view);
+        mapView.setTileSource(TileSourceFactory.MAPNIK);
+        mapView.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.ALWAYS);
+        mapView.setMultiTouchControls(true);
+
+        // ref: https://stackoverflow.com/questions/6210895/listview-inside-scrollview-is-not-scrolling-on-android
+        mapView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                int action = motionEvent.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Disallow ScrollView to intercept touch events.
+                        view.getParent().requestDisallowInterceptTouchEvent(true);
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        // Allow ScrollView to intercept touch events.
+                        view.getParent().requestDisallowInterceptTouchEvent(false);
+                        break;
+                }
+
+                return false;
+            }
+        });
+
+        IMapController controller = mapView.getController();
+        controller.setZoom(4);
+        controller.setCenter(new GeoPoint(48.39479, 129.49519));
 
         if (intent != null) {
             newsID = intent.getStringExtra("id");
@@ -132,7 +174,30 @@ public class NewsDetailActivity extends AppCompatActivity {
                 SimpleCircleButton.Builder builder = new SimpleCircleButton.Builder().normalImageRes(R.drawable.elephant);
                 bmb.addBuilder(builder);
             }
+
+            for (Location location : news.locations) {
+                GroundOverlay2 overlay2 = new GroundOverlay2();
+                overlay2.setTransparency(0.2f);
+                overlay2.setImage(BitmapFactory.decodeResource(getResources(), R.drawable.colored_elephant));
+                Double size = 1.0;
+                overlay2.setPosition(new GeoPoint(location.lat + size, location.lng - size), new GeoPoint(location.lat - size, location.lng + size));
+                mapView.getOverlayManager().add(overlay2);
+                Log.d(TAG, String.format("Add overlay at %f %f", location.lat, location.lng));
+            }
+
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mapView.onPause();
     }
 
     private SimpleCircleButton.Builder buildSharingButton(int drawable, final FetchImagesTask.Target target) {

@@ -1,7 +1,5 @@
 package com.example.newsapp.model;
 
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,7 +7,6 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
@@ -90,11 +87,22 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
         this.keywords = new RealmList<>();
         try {
             JSONArray keywords = json.getJSONArray("keywords");
-            for (int i = 0;i < keywords.length();i++) {
+            for (int i = 0; i < keywords.length(); i++) {
                 JSONObject object = keywords.getJSONObject(i);
                 Double score = object.optDouble("score");
                 String name = object.optString("word");
                 this.keywords.add(new PairDoubleString(score, name));
+            }
+        } catch (JSONException e) {
+            // ignore
+        }
+
+        this.locations = new RealmList<>();
+        try {
+            JSONArray keywords = json.getJSONArray("locations");
+            for (int i = 0; i < keywords.length(); i++) {
+                JSONObject object = keywords.getJSONObject(i);
+                this.locations.add(new Location(object.optInt("count"), object.optDouble("lat"), object.optDouble("lng"), object.optString("linkedURL"), object.optString("mention")));
             }
         } catch (JSONException e) {
             // ignore
