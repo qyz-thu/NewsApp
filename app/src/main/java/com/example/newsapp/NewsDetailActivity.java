@@ -116,7 +116,7 @@ public class NewsDetailActivity extends AppCompatActivity {
                     });
             bmb.addBuilder(builderImageQQ);
 
-            SimpleCircleButton.Builder builderImageWechat = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_qq)
+            SimpleCircleButton.Builder builderImageWechat = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_wechat)
                     .listener(new OnBMClickListener() {
                         @Override
                         public void onBoomButtonClick(int index) {
@@ -230,7 +230,7 @@ class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Ur
                 intent.setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.tools.ShareToTimeLineUI"));
                 break;
             case QQ:
-                intent.setComponent(new ComponentName("com.tencent.mobileqq", "com.tencent.mobileqq.activity.JumpActivity"));
+                intent.setPackage("com.tencent.mobileqq");
                 break;
             case WEIBO:
                 intent.setPackage("com.sina.weibo");
