@@ -20,6 +20,7 @@
     <string name="my_account">My Account</string>
     <string name="news_detail">News Detail</string>
     <string name="downloading_images">Downloading images, please wait...</string>
+    <string name="app_not_installed">Sharing failed because app is not installed</string>
     <string-array name="categories_name">
         <item>Entertainment</item>
         <item>Military</item>

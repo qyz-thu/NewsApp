@@ -3,6 +3,7 @@ package com.example.newsapp;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -131,7 +132,7 @@ public class NewsDetailActivity extends AppCompatActivity {
                     .listener(new OnBMClickListener() {
                         @Override
                         public void onBoomButtonClick(int index) {
-                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, 1000).show();
+                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, Toast.LENGTH_LONG).show();
                             AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(FetchImagesTask.Target.WEIBO, news.title, NewsDetailActivity.this);
                             task.execute(new ArrayList<>(news.images));
                         }
@@ -196,6 +197,29 @@ class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Ur
 
     @Override
     protected ArrayList<Uri> doInBackground(ArrayList<String>... urls) {
+        String appId = null;
+        switch (target) {
+            case WECHAT:
+            case MOMENTS:
+                appId = "com.tencent.mm";
+                break;
+            case QQ:
+                appId = "com.tencent.mobileqq";
+                break;
+            case WEIBO:
+                appId = "com.sina.weibo";
+                break;
+        }
+
+        if (appId != null) {
+            try {
+                context.getPackageManager().getPackageInfo(appId, PackageManager.GET_ACTIVITIES);
+            } catch (PackageManager.NameNotFoundException err) {
+                // app not installed
+                return null;
+            }
+        }
+
         ArrayList<Uri> result = new ArrayList<>();
         for (final String url : urls[0]) {
             try {
@@ -215,32 +239,38 @@ class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Ur
 
     @Override
     protected void onPostExecute(final ArrayList<Uri> results) {
-        // ref: https://github.com/YaphetZhao/ShareAnywhere/blob/master/library_shareanywhere/src/main/java/com/yaphetzhao/library_shareanywhere/ShareAnyWhereUtil.java
-        Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-        intent.setType("image/*");
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, results);
-        intent.putExtra("Kdescription", desc);
-
-        switch (target) {
-            case WECHAT:
-                intent.setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.tools.ShareImgUI"));
-                break;
-            case MOMENTS:
-                intent.setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.tools.ShareToTimeLineUI"));
-                break;
-            case QQ:
-                intent.setPackage("com.tencent.mobileqq");
-                break;
-            case WEIBO:
-                intent.setPackage("com.sina.weibo");
-                break;
-        }
-        if (target == Target.SELECT) {
-            context.startActivity(Intent.createChooser(intent, "分享新闻图片"));
+        if (results == null) {
+            // not installed
+            Toast.makeText(context, R.string.app_not_installed, Toast.LENGTH_LONG).show();
         } else {
-            context.startActivity(intent);
+            // ref: https://github.com/YaphetZhao/ShareAnywhere/blob/master/library_shareanywhere/src/main/java/com/yaphetzhao/library_shareanywhere/ShareAnyWhereUtil.java
+            Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+            intent.setType("image/*");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, results);
+            intent.putExtra("Kdescription", desc);
+
+            switch (target) {
+                case WECHAT:
+                    intent.setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.tools.ShareImgUI"));
+                    break;
+                case MOMENTS:
+                    intent.setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.tools.ShareToTimeLineUI"));
+                    break;
+                case QQ:
+                    intent.setPackage("com.tencent.mobileqq");
+                    break;
+                case WEIBO:
+                    intent.setPackage("com.sina.weibo");
+                    break;
+            }
+            if (target == Target.SELECT) {
+                context.startActivity(Intent.createChooser(intent, "分享新闻图片"));
+            } else {
+                context.startActivity(intent);
+            }
         }
+
     }
 
     enum Target {

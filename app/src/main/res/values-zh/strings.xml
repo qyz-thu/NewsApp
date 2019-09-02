@@ -33,4 +33,5 @@
     </string-array>
     <string name="my_account">我的帐号</string>
     <string name="downloading_images">正在下载图片，请稍候。。</string>
+    <string name="app_not_installed">未安装 App 故分享失败</string>
 </resources>
