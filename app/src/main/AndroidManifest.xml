@@ -34,7 +34,7 @@
         </activity>
         <activity android:name=".NewsDetailActivity"
             android:parentActivityName=".MainActivity"
-            android:label="News Detail"
+            android:label="@string/news_detail"
             android:theme="@style/NewsDetailTheme">
 
         </activity>

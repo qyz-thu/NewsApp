@@ -46,6 +46,8 @@ public class NewsDetailActivity extends AppCompatActivity {
     TextView date_view;
     ViewPager viewPager;
 
+    News news;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +65,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         }
 
         final Realm realm = Realm.getDefaultInstance();
-        final News news = realm.where(News.class).equalTo("newsID", newsID).findFirst();
+        news = realm.where(News.class).equalTo("newsID", newsID).findFirst();
         if (news != null) {
             title_view.setText(news.title);
             content_view.setText(news.content);
@@ -95,38 +97,9 @@ public class NewsDetailActivity extends AppCompatActivity {
                     });
             bmb.addBuilder(builderText);
 
-            SimpleCircleButton.Builder builderImage = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_images)
-                    .listener(new OnBMClickListener() {
-                        @Override
-                        public void onBoomButtonClick(int index) {
-                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, Toast.LENGTH_LONG).show();
-                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(FetchImagesTask.Target.SELECT, news.title, NewsDetailActivity.this);
-                            task.execute(new ArrayList<>(news.images));
-                        }
-                    });
-            bmb.addBuilder(builderImage);
-
-            SimpleCircleButton.Builder builderImageQQ = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_qq)
-                    .listener(new OnBMClickListener() {
-                        @Override
-                        public void onBoomButtonClick(int index) {
-                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, Toast.LENGTH_LONG).show();
-                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(FetchImagesTask.Target.QQ, news.title, NewsDetailActivity.this);
-                            task.execute(new ArrayList<>(news.images));
-                        }
-                    });
-            bmb.addBuilder(builderImageQQ);
-
-            SimpleCircleButton.Builder builderImageWechat = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_wechat)
-                    .listener(new OnBMClickListener() {
-                        @Override
-                        public void onBoomButtonClick(int index) {
-                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, Toast.LENGTH_LONG).show();
-                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(FetchImagesTask.Target.WECHAT, news.title, NewsDetailActivity.this);
-                            task.execute(new ArrayList<>(news.images));
-                        }
-                    });
-            bmb.addBuilder(builderImageWechat);
+            bmb.addBuilder(buildSharingButton(R.drawable.ic_images, FetchImagesTask.Target.SELECT));
+            bmb.addBuilder(buildSharingButton(R.drawable.ic_qq, FetchImagesTask.Target.QQ));
+            bmb.addBuilder(buildSharingButton(R.drawable.ic_wechat, FetchImagesTask.Target.WECHAT));
 
             SimpleCircleButton.Builder builderImageStar = new SimpleCircleButton.Builder().normalImageRes(news.isStarred ? R.drawable.ic_star_off : R.drawable.ic_star_on)
                     .listener(new OnBMClickListener() {
@@ -143,22 +116,25 @@ public class NewsDetailActivity extends AppCompatActivity {
                     });
             bmb.addBuilder(builderImageStar);
 
-            SimpleCircleButton.Builder builderImageWeibo = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_weibo)
-                    .listener(new OnBMClickListener() {
-                        @Override
-                        public void onBoomButtonClick(int index) {
-                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, Toast.LENGTH_LONG).show();
-                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(FetchImagesTask.Target.WEIBO, news.title, NewsDetailActivity.this);
-                            task.execute(new ArrayList<>(news.images));
-                        }
-                    });
-            bmb.addBuilder(builderImageWeibo);
+            bmb.addBuilder(buildSharingButton(R.drawable.ic_weibo, FetchImagesTask.Target.WEIBO));
 
             for (int i = 6; i < bmb.getPiecePlaceEnum().pieceNumber(); i++) {
                 SimpleCircleButton.Builder builder = new SimpleCircleButton.Builder().normalImageRes(R.drawable.elephant);
                 bmb.addBuilder(builder);
             }
         }
+    }
+
+    private SimpleCircleButton.Builder buildSharingButton(int drawable, final FetchImagesTask.Target target) {
+        return new SimpleCircleButton.Builder().normalImageRes(drawable)
+                .listener(new OnBMClickListener() {
+                    @Override
+                    public void onBoomButtonClick(int index) {
+                        Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, Toast.LENGTH_LONG).show();
+                        AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(target, news.title, NewsDetailActivity.this);
+                        task.execute(new ArrayList<>(news.images));
+                    }
+                });
     }
 
 
