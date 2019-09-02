@@ -36,4 +36,5 @@
     <string name="app_not_installed">未安装 App 故分享失败</string>
     <string name="news_starred_on">已经收藏成功</string>
     <string name="news_starred_off">已经取消收藏</string>
+    <string name="star">收藏</string>
 </resources>

@@ -63,6 +63,7 @@ public class MainActivity extends Activity {
     boolean darkMode;
     Date lastFetch;
     String category = "";
+    boolean onlyStarred = false;
     List<Category> allCategories;
 
     @Override
@@ -135,7 +136,7 @@ public class MainActivity extends Activity {
                 super.onScrollStateChanged(recyclerView, newState);
                 int last = manager.findLastVisibleItemPosition();
 
-                if (last >= 0 && last < adapter.getItemCount() && (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount())) {
+                if (last >= 0 && last < adapter.getItemCount() && (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount()) && !onlyStarred) {
                     Date publishTime = adapter.getItem(last).publishTime;
                     publishTime.setTime(publishTime.getTime() - 1);
                     fetchData(publishTime);
@@ -159,11 +160,13 @@ public class MainActivity extends Activity {
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                onlyStarred = item.getItemId() == R.id.nav_stars;
                 if (item.getItemId() == R.id.nav_pref) {
                     Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                     startActivity(intent);
                     return true;
                 }
+
                 category = "";
                 for (Category cat : allCategories) {
                     if (item.getItemId() == cat.navigationId) {
@@ -188,6 +191,10 @@ public class MainActivity extends Activity {
         if (category.length() > 0) {
             query = query.equalTo("category", category);
         }
+        if (onlyStarred) {
+            query = query.equalTo("isStarred", true);
+        }
+        swipeRefreshLayout.setEnabled(!onlyStarred);
         if (query.count() < 50) {
             fetchData(null);
         }

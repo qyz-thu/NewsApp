@@ -47,4 +47,5 @@
         <item>tech</item>
         <item>society</item>
     </string-array>
+    <string name="star">Favourite</string>
 </resources>

@@ -50,10 +50,14 @@
         </item>
         <group>
             <item
+                android:id="@+id/nav_stars"
+                android:icon="@drawable/ic_star_off"
+                android:title="@string/star">
+            </item>
+            <item
                 android:id="@+id/nav_pref"
                 android:icon="@drawable/ic_settings"
                 android:title="@string/preferences">
-
             </item>
         </group>
     </group>
