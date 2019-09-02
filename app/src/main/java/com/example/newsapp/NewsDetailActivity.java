@@ -24,6 +24,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.Glide;
 import com.example.newsapp.model.News;
+import com.nightonke.boommenu.BoomButtons.BoomButton;
 import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
 import com.nightonke.boommenu.BoomButtons.SimpleCircleButton;
 import com.nightonke.boommenu.BoomMenuButton;
@@ -61,7 +62,7 @@ public class NewsDetailActivity extends AppCompatActivity {
             newsID = intent.getStringExtra("id");
         }
 
-        Realm realm = Realm.getDefaultInstance();
+        final Realm realm = Realm.getDefaultInstance();
         final News news = realm.where(News.class).equalTo("newsID", newsID).findFirst();
         if (news != null) {
             title_view.setText(news.title);
@@ -73,7 +74,6 @@ public class NewsDetailActivity extends AppCompatActivity {
                 realm.beginTransaction();
                 news.isRead = true;
                 realm.commitTransaction();
-                realm.close();
             }
 
             if (news.images == null || news.images.size() == 0) {
@@ -81,7 +81,7 @@ public class NewsDetailActivity extends AppCompatActivity {
             }
 
             viewPager.setAdapter(new NewsImageAdapter(getSupportFragmentManager(), this, news.images));
-            BoomMenuButton bmb = findViewById(R.id.boom_menu);
+            final BoomMenuButton bmb = findViewById(R.id.boom_menu);
 
             SimpleCircleButton.Builder builderText = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_text)
                     .listener(new OnBMClickListener() {
@@ -99,7 +99,7 @@ public class NewsDetailActivity extends AppCompatActivity {
                     .listener(new OnBMClickListener() {
                         @Override
                         public void onBoomButtonClick(int index) {
-                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, 1000).show();
+                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, Toast.LENGTH_LONG).show();
                             AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(FetchImagesTask.Target.SELECT, news.title, NewsDetailActivity.this);
                             task.execute(new ArrayList<>(news.images));
                         }
@@ -110,7 +110,7 @@ public class NewsDetailActivity extends AppCompatActivity {
                     .listener(new OnBMClickListener() {
                         @Override
                         public void onBoomButtonClick(int index) {
-                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, 1000).show();
+                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, Toast.LENGTH_LONG).show();
                             AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(FetchImagesTask.Target.QQ, news.title, NewsDetailActivity.this);
                             task.execute(new ArrayList<>(news.images));
                         }
@@ -121,12 +121,27 @@ public class NewsDetailActivity extends AppCompatActivity {
                     .listener(new OnBMClickListener() {
                         @Override
                         public void onBoomButtonClick(int index) {
-                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, 1000).show();
+                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, Toast.LENGTH_LONG).show();
                             AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(FetchImagesTask.Target.WECHAT, news.title, NewsDetailActivity.this);
                             task.execute(new ArrayList<>(news.images));
                         }
                     });
             bmb.addBuilder(builderImageWechat);
+
+            SimpleCircleButton.Builder builderImageStar = new SimpleCircleButton.Builder().normalImageRes(news.isStarred ? R.drawable.ic_star_off : R.drawable.ic_star_on)
+                    .listener(new OnBMClickListener() {
+                        @Override
+                        public void onBoomButtonClick(int index) {
+                            realm.beginTransaction();
+                            news.isStarred = !news.isStarred;
+                            realm.commitTransaction();
+                            Toast.makeText(NewsDetailActivity.this, news.isStarred ? R.string.news_starred_on : R.string.news_starred_off, Toast.LENGTH_LONG).show();
+
+                            BoomButton button = bmb.getBoomButton(4);
+                            button.getImageView().setImageDrawable(getDrawable(news.isStarred ? R.drawable.ic_star_off : R.drawable.ic_star_on));
+                        }
+                    });
+            bmb.addBuilder(builderImageStar);
 
             SimpleCircleButton.Builder builderImageWeibo = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_weibo)
                     .listener(new OnBMClickListener() {
@@ -139,7 +154,7 @@ public class NewsDetailActivity extends AppCompatActivity {
                     });
             bmb.addBuilder(builderImageWeibo);
 
-            for (int i = 5; i < bmb.getPiecePlaceEnum().pieceNumber(); i++) {
+            for (int i = 6; i < bmb.getPiecePlaceEnum().pieceNumber(); i++) {
                 SimpleCircleButton.Builder builder = new SimpleCircleButton.Builder().normalImageRes(R.drawable.elephant);
                 bmb.addBuilder(builder);
             }
