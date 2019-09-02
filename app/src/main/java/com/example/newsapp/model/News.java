@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
+import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.Index;
@@ -46,7 +47,6 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
     }
 
     public void assign(JSONObject json) {
-        this.isRead = false;
         this.lang = json.optString("language");
         this.video = json.optString("video");
         this.title = json.optString("title");
@@ -81,6 +81,9 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
         } catch (JSONException e) {
             // ignore
         }
+
+        News prev = Realm.getDefaultInstance().where(News.class).equalTo("newsID", this.newsID).findFirst();
+        this.isRead = prev != null && prev.isRead;
 
         // TODO: the rest
     }

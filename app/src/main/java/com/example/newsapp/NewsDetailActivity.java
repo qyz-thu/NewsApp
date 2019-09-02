@@ -16,6 +16,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.example.newsapp.model.News;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import io.realm.Realm;
@@ -50,13 +51,14 @@ public class NewsDetailActivity extends AppCompatActivity {
         if (news != null) {
             title_view.setText(news.title);
             content_view.setText(news.content);
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ");
-            date_view.setText(format.format(news.publishTime) + news.publisher);
+            DateFormat format = SimpleDateFormat.getDateTimeInstance();
+            date_view.setText(format.format(news.publishTime) + " " + news.publisher);
 
             if (!news.isRead) {
                 realm.beginTransaction();
                 news.isRead = true;
                 realm.commitTransaction();
+                realm.close();
             }
 
             if (news.images == null || news.images.size() == 0) {
