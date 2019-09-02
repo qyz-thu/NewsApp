@@ -37,4 +37,5 @@
     <string name="news_starred_on">已经收藏成功</string>
     <string name="news_starred_off">已经取消收藏</string>
     <string name="star">收藏</string>
+    <string name="search">搜索</string>
 </resources>

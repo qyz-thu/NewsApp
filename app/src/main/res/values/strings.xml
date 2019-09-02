@@ -48,4 +48,5 @@
         <item>society</item>
     </string-array>
     <string name="star">Favourite</string>
+    <string name="search">Search</string>
 </resources>

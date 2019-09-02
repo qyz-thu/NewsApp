@@ -9,4 +9,9 @@ public class PairDoubleString extends RealmObject {
     public PairDoubleString() {
 
     }
+
+    public PairDoubleString(Double score, String name) {
+        this.score = score;
+        this.name = name;
+    }
 }

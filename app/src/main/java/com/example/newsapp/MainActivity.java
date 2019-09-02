@@ -1,17 +1,22 @@
 package com.example.newsapp;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -30,8 +35,6 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.newsapp.model.News;
 import com.google.android.material.navigation.NavigationView;
-import com.nightonke.boommenu.BoomButtons.SimpleCircleButton;
-import com.nightonke.boommenu.BoomMenuButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,6 +67,7 @@ public class MainActivity extends Activity {
     Date lastFetch;
     String category = "";
     boolean onlyStarred = false;
+    String searchKeyword = "";
     List<Category> allCategories;
 
     @Override
@@ -161,19 +165,36 @@ public class MainActivity extends Activity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 onlyStarred = item.getItemId() == R.id.nav_stars;
+                searchKeyword = "";
+                category = "";
+
                 if (item.getItemId() == R.id.nav_pref) {
                     Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                     startActivity(intent);
                     return true;
-                }
-
-                category = "";
-                for (Category cat : allCategories) {
-                    if (item.getItemId() == cat.navigationId) {
-                        category = cat.chineseName;
-                        break;
+                } else if (item.getItemId() == R.id.nav_search) {
+                    LinearLayout layout = new LinearLayout(MainActivity.this);
+                    layout.setPadding(50, 10, 50, 20);
+                    final EditText input = new EditText(MainActivity.this);
+                    input.setInputType(InputType.TYPE_CLASS_TEXT);
+                    layout.addView(input, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                    new AlertDialog.Builder(MainActivity.this).setTitle(R.string.search).setView(layout)
+                            .setPositiveButton(R.string.search, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    searchKeyword = input.getText().toString();
+                                    updateData();
+                                }
+                            }).setCancelable(false).show();
+                } else {
+                    for (Category cat : allCategories) {
+                        if (item.getItemId() == cat.navigationId) {
+                            category = cat.chineseName;
+                            break;
+                        }
                     }
                 }
+
 
                 updateData();
                 drawerLayout.closeDrawers();
@@ -190,9 +211,11 @@ public class MainActivity extends Activity {
         query = realm.where(News.class);
         if (category.length() > 0) {
             query = query.equalTo("category", category);
-        }
-        if (onlyStarred) {
+        } else if (onlyStarred) {
             query = query.equalTo("isStarred", true);
+        } else if (searchKeyword.length() > 0) {
+            query = query.equalTo("keywords.name", searchKeyword);
+
         }
         swipeRefreshLayout.setEnabled(!onlyStarred);
         if (query.count() < 50) {
@@ -241,7 +264,7 @@ public class MainActivity extends Activity {
         lastFetch = endDate;
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd%20HH:mm:ss", Locale.CHINA);
-        String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=50&endDate=%s&words=&categories=%s", format.format(endDate), category);
+        String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=50&endDate=%s&words=%s&categories=%s", format.format(endDate), searchKeyword, category);
         Log.d(TAG, url);
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {

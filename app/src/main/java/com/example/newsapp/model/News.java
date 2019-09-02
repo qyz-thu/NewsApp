@@ -2,6 +2,7 @@ package com.example.newsapp.model;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -78,6 +79,18 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
                 if (trimmed.length() > 0) {
                     this.images.add(trimmed);
                 }
+            }
+        } catch (JSONException e) {
+            // ignore
+        }
+        this.keywords = new RealmList<>();
+        try {
+            JSONArray keywords = json.getJSONArray("keywords");
+            for (int i = 0;i < keywords.length();i++) {
+                JSONObject object = keywords.getJSONObject(i);
+                Double score = object.optDouble("score");
+                String name = object.optString("word");
+                this.keywords.add(new PairDoubleString(score, name));
             }
         } catch (JSONException e) {
             // ignore

@@ -55,6 +55,11 @@
                 android:title="@string/star">
             </item>
             <item
+                android:id="@+id/nav_search"
+                android:icon="@drawable/ic_search"
+                android:title="@string/search">
+            </item>
+            <item
                 android:id="@+id/nav_pref"
                 android:icon="@drawable/ic_settings"
                 android:title="@string/preferences">
