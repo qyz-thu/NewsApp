@@ -66,13 +66,19 @@
 
             <org.osmdroid.views.MapView
                 android:id="@+id/map_view"
-                android:layout_height="500dp"
+                android:layout_height="400dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="30dp"
                 android:layout_width="match_parent">
 
             </org.osmdroid.views.MapView>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recommendations"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
