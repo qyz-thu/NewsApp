@@ -23,6 +23,8 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.android.volley.Request;
@@ -40,8 +42,6 @@ import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
 import com.nightonke.boommenu.BoomButtons.SimpleCircleButton;
 import com.nightonke.boommenu.BoomMenuButton;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -55,11 +55,12 @@ import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmList;
-import io.realm.RealmObject;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
+import io.realm.Sort;
 
 public class NewsDetailActivity extends AppCompatActivity {
     private static final String TAG = NewsDetailActivity.class.getName();
@@ -72,8 +73,9 @@ public class NewsDetailActivity extends AppCompatActivity {
 
     News news;
 
-    List<News> allNews;
+    RealmResults<News> recommendNews;
     RequestQueue queue;
+    RecommendListAdapter adapter;
 
     Realm realm;
 
@@ -137,7 +139,6 @@ public class NewsDetailActivity extends AppCompatActivity {
             getRecommendation();
 
 
-
             if (!news.isRead) {
                 realm.beginTransaction();
                 news.isRead = true;
@@ -199,6 +200,8 @@ public class NewsDetailActivity extends AppCompatActivity {
                 bmb.addBuilder(builder);
             }
 
+            mapView.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
+
             for (Location location : news.locations) {
                 GroundOverlay2 overlay2 = new GroundOverlay2();
                 overlay2.setTransparency(0.2f);
@@ -209,6 +212,7 @@ public class NewsDetailActivity extends AppCompatActivity {
                 Log.d(TAG, String.format("Add overlay at %f %f", location.lat, location.lng));
             }
 
+            getRecommendation();
         }
     }
 
@@ -236,6 +240,56 @@ public class NewsDetailActivity extends AppCompatActivity {
                 });
     }
 
+    private void getRecommendation() {
+        RealmQuery<News> query = Realm.getDefaultInstance().where(News.class);
+        query = query.beginGroup();
+        for (int i = 0; i < news.keywords.size(); i++) {
+            PairDoubleString p = news.keywords.get(i);
+            Log.d(TAG, p.name);
+            String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=10&startDate=&endDate=&words=%s&categories=", p.name);
+            JsonObjectRequest req = new JsonObjectRequest
+                    (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(final JSONObject response) {
+                            new FetchDataTask(null).execute(response);
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d(TAG, "network", error);
+                        }
+                    });
+            queue.add(req);
+
+            if (i > 0) {
+                query = query.or();
+            }
+            query = query.equalTo("keywords.name", p.name);
+        }
+        query = query.endGroup();
+
+        query = query.notEqualTo("newsID", news.newsID).sort("publishTime", Sort.DESCENDING).limit(3);
+        recommendNews = query.findAllAsync();
+
+        RecyclerView recyclerView = findViewById(R.id.recommendations);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemViewCacheSize(20);
+        final LinearLayoutManager manager = new LinearLayoutManager(this);
+        manager.setItemPrefetchEnabled(true);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setAdapter(adapter = new RecommendListAdapter(recommendNews, this));
+        adapter.setOnItemClickListener(new RecommendListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                News news = adapter.getItem(position);
+                Intent intent = new Intent(NewsDetailActivity.this, NewsDetailActivity.class);
+                intent.putExtra("id", news == null ? "" : news.newsID);
+                startActivity(intent);
+            }
+        });
+    }
+
+    // TODO: news recommendation
 
     private class NewsImageAdapter extends FragmentPagerAdapter {
         RealmList<String> images;
@@ -266,53 +320,6 @@ public class NewsDetailActivity extends AppCompatActivity {
         @Override
         public CharSequence getPageTitle(int position) {
             return "图片 " + (position + 1);
-        }
-    }
-
-
-    // TODO: news recommendation
-
-    private void getRecommendation()
-    {
-        RealmList<PairDoubleString> keywords = news.keywords;
-        allNews = new ArrayList<>();
-        for (PairDoubleString p: keywords)
-        {
-            Log.d(TAG, p.name);
-            String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=10&startDate=&endDate=&words=%s&categories=", p.name);
-            JsonObjectRequest req = new JsonObjectRequest
-                    (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(final JSONObject response) {
-                            JSONArray data;
-                            try {
-                                Log.d("detailed activity", response.toString());
-                                data = response.getJSONArray("data");
-                                for (int i=0;i<data.length();i++) {
-                                    JSONObject obj = data.getJSONObject(i);
-                                    News _news = new News();
-                                    _news.assign(obj);
-                                    allNews.add(_news);
-                                    realm.copyToRealmOrUpdate(_news);
-                                }
-
-                            }catch (JSONException e)
-                            {
-                                e.printStackTrace();
-                            }
-
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.d(TAG, "network", error);
-                        }
-                    });
-            queue.add(req);
-        }
-        for (News n: allNews)
-        {
-            ;
         }
     }
 }

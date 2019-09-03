@@ -40,7 +40,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -270,7 +269,12 @@ public class MainActivity extends Activity {
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(final JSONObject response) {
-                        new FetchDataTask(swipeRefreshLayout).execute(response);
+                        new FetchDataTask(new Runnable() {
+                            @Override
+                            public void run() {
+                                swipeRefreshLayout.setRefreshing(false);
+                            }
+                        }).execute(response);
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -283,48 +287,6 @@ public class MainActivity extends Activity {
 
 }
 
-class FetchDataTask extends AsyncTask<JSONObject, Integer, List<News>> {
-    private WeakReference<SwipeRefreshLayout> swipeRefreshLayout;
-
-    FetchDataTask(SwipeRefreshLayout swipeRefreshLayout) {
-        this.swipeRefreshLayout = new WeakReference<>(swipeRefreshLayout);
-    }
-
-    @Override
-    protected List<News> doInBackground(JSONObject... jsonObjects) {
-        final JSONObject response = jsonObjects[0];
-        List<News> result = new ArrayList<>();
-        try {
-            JSONArray data = response.getJSONArray("data");
-            for (int i = 0; i < data.length(); i++) {
-                final JSONObject obj = data.getJSONObject(i);
-                News news = new News();
-                news.assign(obj);
-                result.add(news);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    @Override
-    protected void onPostExecute(final List<News> allNews) {
-        Realm.getDefaultInstance().executeTransactionAsync(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                for (News news : allNews) {
-                    realm.copyToRealmOrUpdate(news);
-                }
-            }
-        });
-
-        SwipeRefreshLayout layout = swipeRefreshLayout.get();
-        if (layout != null) {
-            layout.setRefreshing(false);
-        }
-    }
-}
 
 class Category {
     int navigationId;
