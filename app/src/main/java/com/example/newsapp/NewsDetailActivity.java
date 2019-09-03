@@ -25,14 +25,24 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.newsapp.model.Location;
 import com.example.newsapp.model.News;
+import com.example.newsapp.model.PairDoubleString;
 import com.nightonke.boommenu.BoomButtons.BoomButton;
 import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
 import com.nightonke.boommenu.BoomButtons.SimpleCircleButton;
 import com.nightonke.boommenu.BoomMenuButton;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
@@ -45,9 +55,11 @@ import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmList;
+import io.realm.RealmObject;
 
 public class NewsDetailActivity extends AppCompatActivity {
     private static final String TAG = NewsDetailActivity.class.getName();
@@ -60,6 +72,11 @@ public class NewsDetailActivity extends AppCompatActivity {
 
     News news;
 
+    List<News> allNews;
+    RequestQueue queue;
+
+    Realm realm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +84,9 @@ public class NewsDetailActivity extends AppCompatActivity {
         setContentView(R.layout.news_detail_activity);
         Intent intent = getIntent();
         String newsID = "";
+
+        queue = Volley.newRequestQueue(getApplicationContext());
+
         title_view = findViewById(R.id.news_title);
         content_view = findViewById(R.id.news_content);
         date_view = findViewById(R.id.news_date);
@@ -106,13 +126,17 @@ public class NewsDetailActivity extends AppCompatActivity {
             newsID = intent.getStringExtra("id");
         }
 
-        final Realm realm = Realm.getDefaultInstance();
+        realm = Realm.getDefaultInstance();
         news = realm.where(News.class).equalTo("newsID", newsID).findFirst();
         if (news != null) {
             title_view.setText(news.title);
             content_view.setText(news.content);
             DateFormat format = SimpleDateFormat.getDateTimeInstance();
             date_view.setText(format.format(news.publishTime) + " " + news.publisher);
+
+            getRecommendation();
+
+
 
             if (!news.isRead) {
                 realm.beginTransaction();
@@ -246,7 +270,51 @@ public class NewsDetailActivity extends AppCompatActivity {
     }
 
 
-    // TODO: share link; news recommendation; show multiple images
+    // TODO: news recommendation
+
+    private void getRecommendation()
+    {
+        RealmList<PairDoubleString> keywords = news.keywords;
+        allNews = new ArrayList<>();
+        for (PairDoubleString p: keywords)
+        {
+            Log.d(TAG, p.name);
+            String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=10&startDate=&endDate=&words=%s&categories=", p.name);
+            JsonObjectRequest req = new JsonObjectRequest
+                    (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(final JSONObject response) {
+                            JSONArray data;
+                            try {
+                                Log.d("detailed activity", response.toString());
+                                data = response.getJSONArray("data");
+                                for (int i=0;i<data.length();i++) {
+                                    JSONObject obj = data.getJSONObject(i);
+                                    News _news = new News();
+                                    _news.assign(obj);
+                                    allNews.add(_news);
+                                    realm.copyToRealmOrUpdate(_news);
+                                }
+
+                            }catch (JSONException e)
+                            {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d(TAG, "network", error);
+                        }
+                    });
+            queue.add(req);
+        }
+        for (News n: allNews)
+        {
+            ;
+        }
+    }
 }
 
 class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> {

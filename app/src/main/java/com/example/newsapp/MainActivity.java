@@ -115,7 +115,7 @@ public class MainActivity extends Activity {
         Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Lato-Regular.ttf");
         titleText.setTypeface(tf);
 
-        queue = Volley.newRequestQueue(this);
+        queue = Volley.newRequestQueue(getApplicationContext());
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
