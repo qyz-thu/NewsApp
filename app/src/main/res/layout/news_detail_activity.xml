@@ -25,7 +25,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="20dp"
                 android:gravity="center"
-                android:textColor="@color/colorNewsTitle"
+                android:textColor="@color/black"
                 android:textSize="23sp" />
 
             <TextView
@@ -70,6 +70,15 @@
                 android:layout_width="match_parent">
 
             </org.osmdroid.views.MapView>
+
+            <TextView
+                android:id="@+id/recommendation_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
+                android:text="@string/recommend"
+                android:textSize="30sp"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recommendations"

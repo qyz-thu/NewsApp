@@ -23,6 +23,7 @@
     <string name="app_not_installed">Sharing failed because app is not installed</string>
     <string name="news_starred_on">You have starred the news</string>
     <string name="news_starred_off">You no longer star the news</string>
+    <string name="recommend">Recommendations</string>
     <string-array name="categories_name">
         <item>Entertainment</item>
         <item>Military</item>

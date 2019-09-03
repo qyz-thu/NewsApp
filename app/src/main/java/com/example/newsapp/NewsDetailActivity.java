@@ -57,6 +57,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -247,13 +248,12 @@ public class NewsDetailActivity extends AppCompatActivity {
 
     private void getRecommendation() {
         RealmQuery<News> query = Realm.getDefaultInstance().where(News.class);
+        TreeSet<PairDoubleString> keywords = new TreeSet<>(news.keywords);
         query = query.beginGroup();
-        for (int i = 0; i < news.keywords.size(); i++) {
-            PairDoubleString p = news.keywords.get(i);
-            if (p.score < 0.5) {
-                // ignore low score keywords
-                continue;
-            }
+        int i=0;
+        for (PairDoubleString p: keywords) {
+            i++;
+            if (p.score < 0.3) break;
             Log.d(TAG, p.name);
             String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=10&startDate=&endDate=&words=%s&categories=", p.name);
             JsonObjectRequest req = new JsonObjectRequest
@@ -269,10 +269,10 @@ public class NewsDetailActivity extends AppCompatActivity {
                         }
                     });
 
-            if (i > 0) {
-                query = query.or();
-            }
+            if (i > 0)  query = query.or();
             query = query.equalTo("keywords.name", p.name);
+            if (i > 5)
+                break;
         }
         query = query.endGroup();
 
