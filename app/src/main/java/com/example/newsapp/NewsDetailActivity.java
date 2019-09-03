@@ -55,8 +55,11 @@ import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
 import io.realm.RealmList;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
@@ -73,7 +76,8 @@ public class NewsDetailActivity extends AppCompatActivity {
 
     News news;
 
-    RealmResults<News> recommendNews;
+    List<News> recommendNews;
+    RealmResults<News> newsRealmResults;
     RequestQueue queue;
     RecommendListAdapter adapter;
 
@@ -88,6 +92,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         String newsID = "";
 
         queue = Volley.newRequestQueue(getApplicationContext());
+        recommendNews = new ArrayList<>();
 
         title_view = findViewById(R.id.news_title);
         content_view = findViewById(R.id.news_content);
@@ -245,6 +250,10 @@ public class NewsDetailActivity extends AppCompatActivity {
         query = query.beginGroup();
         for (int i = 0; i < news.keywords.size(); i++) {
             PairDoubleString p = news.keywords.get(i);
+            if (p.score < 0.5) {
+                // ignore low score keywords
+                continue;
+            }
             Log.d(TAG, p.name);
             String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=10&startDate=&endDate=&words=%s&categories=", p.name);
             JsonObjectRequest req = new JsonObjectRequest
@@ -259,7 +268,6 @@ public class NewsDetailActivity extends AppCompatActivity {
                             Log.d(TAG, "network", error);
                         }
                     });
-            queue.add(req);
 
             if (i > 0) {
                 query = query.or();
@@ -268,8 +276,36 @@ public class NewsDetailActivity extends AppCompatActivity {
         }
         query = query.endGroup();
 
-        query = query.notEqualTo("newsID", news.newsID).sort("publishTime", Sort.DESCENDING).limit(3);
-        recommendNews = query.findAllAsync();
+        query = query.notEqualTo("newsID", news.newsID).sort("publishTime", Sort.DESCENDING).limit(10);
+        newsRealmResults = query.findAllAsync();
+        newsRealmResults.addChangeListener(new RealmChangeListener<RealmResults<News>>() {
+            @Override
+            public void onChange(RealmResults<News> res) {
+                TreeMap<Double, News> map = new TreeMap<>();
+                for (News n : res) {
+                    double score = 0;
+                    for (PairDoubleString myKeyword : news.keywords) {
+                        for (PairDoubleString theirKeyword : n.keywords) {
+                            if (myKeyword.name.equals(theirKeyword.name)) {
+                                score += myKeyword.score * theirKeyword.score;
+                            }
+                        }
+                    }
+                    map.put(score, n);
+                }
+
+                recommendNews.clear();
+                int i = 0;
+                for (Double score : map.descendingKeySet()) {
+                    if (++i > 3) {
+                        break;
+                    }
+                    Log.d(TAG, String.format("Add recommend news with score %f", score));
+                    recommendNews.add(map.get(score));
+                }
+                adapter.notifyDataSetChanged();
+            }
+        });
 
         RecyclerView recyclerView = findViewById(R.id.recommendations);
         recyclerView.setHasFixedSize(true);
@@ -281,7 +317,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         adapter.setOnItemClickListener(new RecommendListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                News news = adapter.getItem(position);
+                News news = adapter.data.get(position);
                 Intent intent = new Intent(NewsDetailActivity.this, NewsDetailActivity.class);
                 intent.putExtra("id", news == null ? "" : news.newsID);
                 startActivity(intent);

@@ -16,19 +16,17 @@ import com.bumptech.glide.Glide;
 import com.example.newsapp.model.News;
 
 import java.util.Date;
+import java.util.List;
 
-import io.realm.RealmRecyclerViewAdapter;
-import io.realm.RealmResults;
-
-public class RecommendListAdapter extends RealmRecyclerViewAdapter<News, RecommendListAdapter.ViewHolder> {
-
+public class RecommendListAdapter extends RecyclerView.Adapter<RecommendListAdapter.ViewHolder> {
+    List<News> data;
     NewsDetailActivity parent;
     private OnItemClickListener onItemClickListener;
 
-    RecommendListAdapter(RealmResults<News> list, NewsDetailActivity parent) {
-        super(list, true, true);
-        setHasStableIds(true);
+    RecommendListAdapter(List<News> data, NewsDetailActivity parent) {
+        this.data = data;
         this.parent = parent;
+        setHasStableIds(true);
     }
 
     void setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -44,7 +42,7 @@ public class RecommendListAdapter extends RealmRecyclerViewAdapter<News, Recomme
 
     @Override
     public void onBindViewHolder(@NonNull RecommendListAdapter.ViewHolder holder, final int position) {
-        News news = getItem(position);
+        News news = data.get(position);
         holder.titleView.setText(news.title);
         holder.titleView.setTypeface(Typeface.DEFAULT, news.isRead ? Typeface.NORMAL : Typeface.BOLD);
         if (!news.images.isEmpty()) {
@@ -72,12 +70,17 @@ public class RecommendListAdapter extends RealmRecyclerViewAdapter<News, Recomme
 
     @Override
     public long getItemId(int position) {
-        News item = this.getItem(position);
+        News item = data.get(position);
         if (item != null && item.newsID != null) {
             return item.newsID.hashCode();
         } else {
             return 0;
         }
+    }
+
+    @Override
+    public int getItemCount() {
+        return data.size();
     }
 
     public interface OnItemClickListener {
