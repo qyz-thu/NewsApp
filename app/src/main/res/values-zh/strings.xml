@@ -40,4 +40,5 @@
     <string name="star">收藏</string>
     <string name="search">搜索</string>
     <string name="recommend_none">没有找到相关新闻</string>
+    <string name="history">历史</string>
 </resources>

@@ -151,8 +151,8 @@ public class NewsDetailActivity extends AppCompatActivity {
             if (!news.isRead) {
                 realm.beginTransaction();
                 news.isRead = true;
-                if (news.lastReadTime == null) {
-                    news.lastReadTime = new Date();
+                if (news.firstReadTime == null) {
+                    news.firstReadTime = new Date();
                 }
                 realm.commitTransaction();
             }

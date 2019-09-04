@@ -66,6 +66,7 @@ public class MainActivity extends Activity {
     Date lastFetch;
     String category = "";
     boolean onlyStarred = false;
+    boolean onlyHistory = false;
     String searchKeyword = "";
     List<Category> allCategories;
 
@@ -139,7 +140,7 @@ public class MainActivity extends Activity {
                 super.onScrollStateChanged(recyclerView, newState);
                 int last = manager.findLastVisibleItemPosition();
 
-                if (last >= 0 && last < adapter.getItemCount() && (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount()) && !onlyStarred) {
+                if (last >= 0 && last < adapter.getItemCount() && (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount()) && !onlyStarred && !onlyHistory) {
                     Date publishTime = adapter.getItem(last).publishTime;
                     publishTime.setTime(publishTime.getTime() - 1);
                     fetchData(publishTime);
@@ -164,6 +165,7 @@ public class MainActivity extends Activity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 onlyStarred = item.getItemId() == R.id.nav_stars;
+                onlyHistory = item.getItemId() == R.id.nav_history;
                 searchKeyword = "";
                 category = "";
 
@@ -212,15 +214,21 @@ public class MainActivity extends Activity {
             query = query.equalTo("category", category);
         } else if (onlyStarred) {
             query = query.equalTo("isStarred", true);
+        } else if (onlyHistory) {
+            query = query.equalTo("isRead", true);
         } else if (searchKeyword.length() > 0) {
             query = query.equalTo("keywords.name", searchKeyword);
 
         }
-        swipeRefreshLayout.setEnabled(!onlyStarred);
-        if (query.count() < 50) {
+        swipeRefreshLayout.setEnabled(!onlyStarred && !onlyHistory);
+        if (query.count() < 50 && !onlyHistory && !onlyStarred) {
             fetchData(null);
         }
-        results = query.findAllAsync().sort("publishTime", Sort.DESCENDING);
+        if (onlyHistory) {
+            results = query.findAllAsync().sort("firstReadTime", Sort.DESCENDING);
+        } else {
+            results = query.findAllAsync().sort("publishTime", Sort.DESCENDING);
+        }
         adapter.updateData(results);
     }
 

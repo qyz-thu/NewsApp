@@ -42,7 +42,7 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
 
     public boolean isRead;
     public boolean isStarred;
-    public Date lastReadTime;
+    public Date firstReadTime;
 
     public News() {
     }
@@ -113,7 +113,7 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
         this.isRead = prev != null && prev.isRead;
         this.isStarred = prev != null && prev.isStarred;
         if (prev != null) {
-            this.lastReadTime = prev.lastReadTime;
+            this.firstReadTime = prev.firstReadTime;
         }
 
         // TODO: the rest
