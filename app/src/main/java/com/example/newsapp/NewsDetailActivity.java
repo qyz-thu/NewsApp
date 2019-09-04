@@ -252,7 +252,6 @@ public class NewsDetailActivity extends AppCompatActivity {
         query = query.beginGroup();
         int i=0;
         for (PairDoubleString p: keywords) {
-            i++;
             if (p.score < 0.3) break;
             Log.d(TAG, p.name);
             String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=10&startDate=&endDate=&words=%s&categories=", p.name);
@@ -271,6 +270,7 @@ public class NewsDetailActivity extends AppCompatActivity {
 
             if (i > 0)  query = query.or();
             query = query.equalTo("keywords.name", p.name);
+            i++;
             if (i > 5)
                 break;
         }
