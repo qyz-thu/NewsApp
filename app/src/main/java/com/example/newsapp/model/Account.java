@@ -13,6 +13,10 @@ public class Account extends RealmObject {
     public RealmList<String> starred_news;
     public boolean active;
 
+    public Account() {
+
+    }
+
     public Account(String name, String pw)
     {
         this.name = name;

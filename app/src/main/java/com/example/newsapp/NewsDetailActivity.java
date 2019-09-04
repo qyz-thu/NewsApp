@@ -76,6 +76,7 @@ public class NewsDetailActivity extends AppCompatActivity {
     ViewPager viewPager;
     MapView mapView;
     TextView emptyRecommendTextView;
+    TextView mapTitle;
 
     News news;
 
@@ -102,6 +103,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         date_view = findViewById(R.id.news_date);
         viewPager = findViewById(R.id.news_images);
         emptyRecommendTextView = findViewById(R.id.recommendation_empty);
+        mapTitle = findViewById(R.id.map_title);
 
         mapView = findViewById(R.id.map_view);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
@@ -213,6 +215,7 @@ public class NewsDetailActivity extends AppCompatActivity {
             }
 
             mapView.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
+            mapTitle.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
 
             for (Location location : news.locations) {
                 GroundOverlay2 overlay2 = new GroundOverlay2();
@@ -287,6 +290,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         newsRealmResults.addChangeListener(new RealmChangeListener<RealmResults<News>>() {
             @Override
             public void onChange(RealmResults<News> res) {
+                Log.d(TAG, "Realm got " + res.toString());
                 TreeMap<Double, News> map = new TreeMap<>();
                 for (News n : res) {
                     double score = 0;
