@@ -55,6 +55,7 @@ import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -74,6 +75,7 @@ public class NewsDetailActivity extends AppCompatActivity {
     TextView date_view;
     ViewPager viewPager;
     MapView mapView;
+    TextView emptyRecommendTextView;
 
     News news;
 
@@ -99,6 +101,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         content_view = findViewById(R.id.news_content);
         date_view = findViewById(R.id.news_date);
         viewPager = findViewById(R.id.news_images);
+        emptyRecommendTextView = findViewById(R.id.recommendation_empty);
 
         mapView = findViewById(R.id.map_view);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
@@ -148,6 +151,9 @@ public class NewsDetailActivity extends AppCompatActivity {
             if (!news.isRead) {
                 realm.beginTransaction();
                 news.isRead = true;
+                if (news.lastReadTime == null) {
+                    news.lastReadTime = new Date();
+                }
                 realm.commitTransaction();
             }
 
@@ -250,8 +256,8 @@ public class NewsDetailActivity extends AppCompatActivity {
         RealmQuery<News> query = Realm.getDefaultInstance().where(News.class);
         TreeSet<PairDoubleString> keywords = new TreeSet<>(news.keywords);
         query = query.beginGroup();
-        int i=0;
-        for (PairDoubleString p: keywords) {
+        int i = 0;
+        for (PairDoubleString p : keywords) {
             if (p.score < 0.3) break;
             Log.d(TAG, p.name);
             String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=10&startDate=&endDate=&words=%s&categories=", p.name);
@@ -268,7 +274,7 @@ public class NewsDetailActivity extends AppCompatActivity {
                         }
                     });
 
-            if (i > 0)  query = query.or();
+            if (i > 0) query = query.or();
             query = query.equalTo("keywords.name", p.name);
             i++;
             if (i > 5)
@@ -303,6 +309,8 @@ public class NewsDetailActivity extends AppCompatActivity {
                     Log.d(TAG, String.format("Add recommend news with score %f", score));
                     recommendNews.add(map.get(score));
                 }
+
+                emptyRecommendTextView.setVisibility(recommendNews.size() > 0 ? View.GONE : View.VISIBLE);
                 adapter.notifyDataSetChanged();
             }
         });

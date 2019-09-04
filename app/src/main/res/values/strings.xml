@@ -50,4 +50,5 @@
     </string-array>
     <string name="star">Favourite</string>
     <string name="search">Search</string>
+    <string name="recommend_none">No recommendations found</string>
 </resources>
