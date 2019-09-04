@@ -187,37 +187,6 @@ public class NewsDetailActivity extends AppCompatActivity {
                     });
             bmb.addBuilder(builderText);
 
-            bmb.addBuilder(buildSharingButton(R.drawable.ic_images, FetchImagesTask.Target.SELECT));
-            bmb.addBuilder(buildSharingButton(R.drawable.ic_qq, FetchImagesTask.Target.QQ));
-            bmb.addBuilder(buildSharingButton(R.drawable.ic_wechat, FetchImagesTask.Target.WECHAT));
-
-            SimpleCircleButton.Builder builderImageStar = new SimpleCircleButton.Builder().normalImageRes(news.isStarred ? R.drawable.ic_star_off : R.drawable.ic_star_on)
-                    .listener(new OnBMClickListener() {
-                        @Override
-                        public void onBoomButtonClick(int index) {
-                            realm.beginTransaction();
-                            news.isStarred = !news.isStarred;
-                            realm.commitTransaction();
-                            Toast.makeText(NewsDetailActivity.this, news.isStarred ? R.string.news_starred_on : R.string.news_starred_off, Toast.LENGTH_LONG).show();
-
-                            BoomButton button = bmb.getBoomButton(4);
-                            button.getImageView().setImageDrawable(getDrawable(news.isStarred ? R.drawable.ic_star_off : R.drawable.ic_star_on));
-                        }
-                    });
-            bmb.addBuilder(builderImageStar);
-
-            bmb.addBuilder(buildSharingButton(R.drawable.ic_weibo, FetchImagesTask.Target.WEIBO));
-
-            SimpleCircleButton.Builder builderImageBrowser = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_browse)
-                    .listener(new OnBMClickListener() {
-                        @Override
-                        public void onBoomButtonClick(int index) {
-                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(news.url));
-                            startActivity(intent);
-                        }
-                    });
-            bmb.addBuilder(builderImageBrowser);
-
             SimpleCircleButton.Builder builderImageText = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_text2)
                     .listener(new OnBMClickListener() {
                         @Override
@@ -254,6 +223,38 @@ public class NewsDetailActivity extends AppCompatActivity {
                         }
                     });
             bmb.addBuilder(builderImageTextWithImages);
+
+            bmb.addBuilder(buildSharingButton(R.drawable.ic_images, FetchImagesTask.Target.SELECT));
+
+            SimpleCircleButton.Builder builderImageStar = new SimpleCircleButton.Builder().normalImageRes(news.isStarred ? R.drawable.ic_star_off : R.drawable.ic_star_on)
+                    .listener(new OnBMClickListener() {
+                        @Override
+                        public void onBoomButtonClick(int index) {
+                            realm.beginTransaction();
+                            news.isStarred = !news.isStarred;
+                            realm.commitTransaction();
+                            Toast.makeText(NewsDetailActivity.this, news.isStarred ? R.string.news_starred_on : R.string.news_starred_off, Toast.LENGTH_LONG).show();
+
+                            BoomButton button = bmb.getBoomButton(4);
+                            button.getImageView().setImageDrawable(getDrawable(news.isStarred ? R.drawable.ic_star_off : R.drawable.ic_star_on));
+                        }
+                    });
+            bmb.addBuilder(builderImageStar);
+
+            SimpleCircleButton.Builder builderImageBrowser = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_browse)
+                    .listener(new OnBMClickListener() {
+                        @Override
+                        public void onBoomButtonClick(int index) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(news.url));
+                            startActivity(intent);
+                        }
+                    });
+            bmb.addBuilder(builderImageBrowser);
+
+            bmb.addBuilder(buildSharingButton(R.drawable.ic_qq, FetchImagesTask.Target.QQ));
+            bmb.addBuilder(buildSharingButton(R.drawable.ic_wechat, FetchImagesTask.Target.WECHAT));
+            bmb.addBuilder(buildSharingButton(R.drawable.ic_weibo, FetchImagesTask.Target.WEIBO));
+
 
             mapView.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
             mapTitle.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
@@ -575,6 +576,6 @@ class SaveTextAndFetchImagesTask extends AsyncTask<ArrayList<String>, Integer, A
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, results);
 
-        context.startActivity(Intent.createChooser(intent, "分享新闻图片"));
+        context.startActivity(Intent.createChooser(intent, "分享新闻全文长图"));
     }
 }
