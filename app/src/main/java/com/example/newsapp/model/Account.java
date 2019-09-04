@@ -23,6 +23,8 @@ public class Account extends RealmObject {
         this.password = pw;
         this.read_news = new RealmList<>();
         this.starred_news = new RealmList<>();
-        this.active = false;
+        this.active = true;
     }
+
+
 }
