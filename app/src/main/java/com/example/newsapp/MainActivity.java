@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -90,8 +91,8 @@ public class MainActivity extends Activity {
 
         realm = Realm.getDefaultInstance();
         realm.beginTransaction();
-        realm.copyToRealmOrUpdate(new Account("chenjiajie", "123456"));
-        realm.commitTransaction();
+        realm.copyToRealmOrUpdate(new Account("chenjiajie", "123456", false));
+        realm.copyToRealmOrUpdate(new Account("qianyingzhuo", "123456", true));
 
         currentAccount = realm.where(Account.class).equalTo("active", true).findFirst();
         if (currentAccount == null)
@@ -99,6 +100,8 @@ public class MainActivity extends Activity {
             currentAccount = realm.where(Account.class).equalTo("name", "chenjiajie").findFirst();
             currentAccount.active = true;
         }
+        realm.commitTransaction();
+
 
         allCategories = new ArrayList<>();
         allCategories.add(new Category(R.id.nav_entertainment, "entertainment", "娱乐"));
@@ -185,6 +188,15 @@ public class MainActivity extends Activity {
             account_avatar.setImageResource(R.drawable.cjj_avatar);
         else if (currentAccount.name.equals("qianyingzhuo"))
             account_avatar.setImageResource(R.drawable.qyz_avatar);
+        account_avatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Toast.makeText(MainActivity.this, "you have clicked the avatar.", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(MainActivity.this, AccountManageActivity.class);
+                startActivity(intent);
+            }
+        });
+
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override

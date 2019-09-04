@@ -39,6 +39,10 @@
             android:theme="@style/NewsDetailTheme">
 
         </activity>
+        <activity android:name=".AccountManageActivity"
+            android:parentActivityName=".MainActivity"
+            android:label="Account Management" />
+
         <provider
             android:authorities="${applicationId}.provider"
             android:exported="false"
