@@ -218,42 +218,42 @@ public class NewsDetailActivity extends AppCompatActivity {
                     });
             bmb.addBuilder(builderImageBrowser);
 
-            SimpleCircleButton.Builder builderImageSave = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_text2)
+            SimpleCircleButton.Builder builderImageText = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_text2)
                     .listener(new OnBMClickListener() {
                         @Override
                         public void onBoomButtonClick(int index) {
-                            try {
-                                View view = contentView;
+                            View view = contentView;
 
-                                Bitmap bitmap = Bitmap.createBitmap(view.getWidth(),
-                                        view.getHeight(), Bitmap.Config.ARGB_8888);
-                                Canvas canvas = new Canvas(bitmap);
-                                canvas.drawColor(Color.WHITE);
-                                view.draw(canvas);
+                            Bitmap bitmap = Bitmap.createBitmap(view.getWidth(),
+                                    view.getHeight(), Bitmap.Config.ARGB_8888);
+                            Canvas canvas = new Canvas(bitmap);
+                            canvas.drawColor(Color.WHITE);
+                            view.draw(canvas);
 
-                                File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_" + new Date().toString() + ".png");
-
-                                FileOutputStream outputStream = new FileOutputStream(file);
-                                bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
-
-                                outputStream.close();
-                                Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-                                intent.setType("image/*");
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                intent.putExtra(Intent.EXTRA_TEXT, news.title);
-                                ArrayList<Uri> results = new ArrayList<>();
-                                results.add(FileProvider.getUriForFile(NewsDetailActivity.this, BuildConfig.APPLICATION_ID + ".provider", file));
-                                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, results);
-                                startActivity(Intent.createChooser(intent, "分享新闻全文图片"));
-                            } catch (Exception err) {
-                                err.printStackTrace();
-                            }
+                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new SaveTextAndFetchImagesTask(bitmap, NewsDetailActivity.this);
+                            task.execute(new ArrayList<String>());
                         }
                     });
-            bmb.addBuilder(builderImageSave);
+            bmb.addBuilder(builderImageText);
 
-            SimpleCircleButton.Builder builder = new SimpleCircleButton.Builder().normalImageRes(R.drawable.elephant);
-            bmb.addBuilder(builder);
+            SimpleCircleButton.Builder builderImageTextWithImages = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_archive)
+                    .listener(new OnBMClickListener() {
+                        @Override
+                        public void onBoomButtonClick(int index) {
+                            Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, Toast.LENGTH_LONG).show();
+                            View view = contentView;
+
+                            Bitmap bitmap = Bitmap.createBitmap(view.getWidth(),
+                                    view.getHeight(), Bitmap.Config.ARGB_8888);
+                            Canvas canvas = new Canvas(bitmap);
+                            canvas.drawColor(Color.WHITE);
+                            view.draw(canvas);
+
+                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new SaveTextAndFetchImagesTask(bitmap, NewsDetailActivity.this);
+                            task.execute(new ArrayList<>(news.images));
+                        }
+                    });
+            bmb.addBuilder(builderImageTextWithImages);
 
             mapView.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
             mapTitle.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
@@ -528,3 +528,53 @@ class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Ur
     }
 }
 
+class SaveTextAndFetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> {
+    private Context context;
+    private Bitmap bitmap;
+
+    SaveTextAndFetchImagesTask(Bitmap bitmap, Context context) {
+        this.context = context;
+        this.bitmap = bitmap;
+    }
+
+    @Override
+    protected ArrayList<Uri> doInBackground(ArrayList<String>... urls) {
+
+        ArrayList<Uri> result = new ArrayList<>();
+        try {
+            File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_capture" + new Date().toString() + ".png");
+            FileOutputStream outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
+            outputStream.close();
+            result.add(FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file));
+        } catch (Exception err) {
+            // ignore
+            err.printStackTrace();
+        }
+        for (final String url : urls[0]) {
+            try {
+                Bitmap bitmap = Glide.with(context).asBitmap().load(url).submit().get();
+                File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_" + url.hashCode() + ".png");
+                FileOutputStream outputStream = new FileOutputStream(file);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
+                outputStream.close();
+                result.add(FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file));
+            } catch (Exception err) {
+                // ignore
+                err.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    @Override
+    protected void onPostExecute(final ArrayList<Uri> results) {
+        // ref: https://github.com/YaphetZhao/ShareAnywhere/blob/master/library_shareanywhere/src/main/java/com/yaphetzhao/library_shareanywhere/ShareAnyWhereUtil.java
+        Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        intent.setType("image/*");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, results);
+
+        context.startActivity(Intent.createChooser(intent, "分享新闻图片"));
+    }
+}
