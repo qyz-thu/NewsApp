@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -234,6 +235,13 @@ public class NewsDetailActivity extends AppCompatActivity {
                 Log.d(TAG, "Loading video of url " + news.video);
                 videoView.setVideoURI(Uri.parse(news.video));
                 videoView.start();
+                // looping
+                videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mediaPlayer) {
+                        mediaPlayer.setLooping(true);
+                    }
+                });
             } else {
                 videoView.setVisibility(View.GONE);
             }
