@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -213,10 +214,41 @@ public class NewsDetailActivity extends AppCompatActivity {
                     });
             bmb.addBuilder(builderImageBrowser);
 
-            for (int i = 7; i < bmb.getPiecePlaceEnum().pieceNumber(); i++) {
-                SimpleCircleButton.Builder builder = new SimpleCircleButton.Builder().normalImageRes(R.drawable.elephant);
-                bmb.addBuilder(builder);
-            }
+            SimpleCircleButton.Builder builderImageSave = new SimpleCircleButton.Builder().normalImageRes(R.drawable.ic_text2)
+                    .listener(new OnBMClickListener() {
+                        @Override
+                        public void onBoomButtonClick(int index) {
+                            try {
+                                View view = getWindow().getDecorView().getRootView();
+
+                                Bitmap bitmap = Bitmap.createBitmap(view.getWidth(),
+                                        view.getHeight(), Bitmap.Config.ARGB_8888);
+                                Canvas canvas = new Canvas(bitmap);
+                                view.draw(canvas);
+
+                                File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_capture.jpg");
+
+                                FileOutputStream outputStream = new FileOutputStream(file);
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+
+                                outputStream.close();
+                                Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+                                intent.setType("image/*");
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.putExtra(Intent.EXTRA_TEXT, news.title);
+                                ArrayList<Uri> results = new ArrayList<>();
+                                results.add(FileProvider.getUriForFile(NewsDetailActivity.this, BuildConfig.APPLICATION_ID + ".provider", file));
+                                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, results);
+                                startActivity(Intent.createChooser(intent, "分享新闻全文图片"));
+                            } catch (Exception err) {
+                                err.printStackTrace();
+                            }
+                        }
+                    });
+            bmb.addBuilder(builderImageSave);
+
+            SimpleCircleButton.Builder builder = new SimpleCircleButton.Builder().normalImageRes(R.drawable.elephant);
+            bmb.addBuilder(builder);
 
             mapView.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
             mapTitle.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
@@ -457,6 +489,7 @@ class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Ur
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, results);
             intent.putExtra("Kdescription", desc);
+            intent.putExtra(Intent.EXTRA_TEXT, desc);
 
             switch (target) {
                 case WECHAT:
