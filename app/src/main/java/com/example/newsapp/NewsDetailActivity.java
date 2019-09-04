@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -15,6 +16,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -74,13 +76,14 @@ public class NewsDetailActivity extends AppCompatActivity {
     private static final String TAG = NewsDetailActivity.class.getName();
 
     TextView title_view;
-    TextView content_view;
+    TextView contentTextView;
     TextView date_view;
     ViewPager viewPager;
     MapView mapView;
     TextView emptyRecommendTextView;
     TextView mapTitle;
     VideoView videoView;
+    LinearLayout contentView;
 
     News news;
 
@@ -103,12 +106,13 @@ public class NewsDetailActivity extends AppCompatActivity {
         recommendNews = new ArrayList<>();
 
         title_view = findViewById(R.id.news_title);
-        content_view = findViewById(R.id.news_content);
+        contentTextView = findViewById(R.id.news_content);
         date_view = findViewById(R.id.news_date);
         viewPager = findViewById(R.id.news_images);
         emptyRecommendTextView = findViewById(R.id.recommendation_empty);
         mapTitle = findViewById(R.id.map_title);
         videoView = findViewById(R.id.video_view);
+        contentView = findViewById(R.id.content_view);
 
         mapView = findViewById(R.id.map_view);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
@@ -148,7 +152,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         news = realm.where(News.class).equalTo("newsID", newsID).findFirst();
         if (news != null) {
             title_view.setText(news.title);
-            content_view.setText(news.content);
+            contentTextView.setText(news.content);
             DateFormat format = SimpleDateFormat.getDateTimeInstance();
             date_view.setText(format.format(news.publishTime) + " " + news.publisher);
 
@@ -219,17 +223,18 @@ public class NewsDetailActivity extends AppCompatActivity {
                         @Override
                         public void onBoomButtonClick(int index) {
                             try {
-                                View view = getWindow().getDecorView().getRootView();
+                                View view = contentView;
 
                                 Bitmap bitmap = Bitmap.createBitmap(view.getWidth(),
                                         view.getHeight(), Bitmap.Config.ARGB_8888);
                                 Canvas canvas = new Canvas(bitmap);
+                                canvas.drawColor(Color.WHITE);
                                 view.draw(canvas);
 
-                                File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_capture.jpg");
+                                File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_" + new Date().toString() + ".png");
 
                                 FileOutputStream outputStream = new FileOutputStream(file);
-                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                                bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
 
                                 outputStream.close();
                                 Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
@@ -464,7 +469,7 @@ class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Ur
         for (final String url : urls[0]) {
             try {
                 Bitmap bitmap = Glide.with(context).asBitmap().load(url).submit().get();
-                File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_" + url.hashCode() + ".jpg");
+                File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_" + url.hashCode() + ".png");
                 FileOutputStream outputStream = new FileOutputStream(file);
                 bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
                 outputStream.close();
