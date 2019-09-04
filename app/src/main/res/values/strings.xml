@@ -24,6 +24,7 @@
     <string name="news_starred_on">You have starred the news</string>
     <string name="news_starred_off">You no longer star the news</string>
     <string name="recommend">Recommendations</string>
+    <string name="current_account">Current Account</string>
     <string-array name="categories_name">
         <item>Entertainment</item>
         <item>Military</item>

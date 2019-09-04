@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
     boolean onlyHistory = false;
     String searchKeyword = "";
     List<Category> allCategories;
-    Account currentAccount;
+    static Account currentAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
