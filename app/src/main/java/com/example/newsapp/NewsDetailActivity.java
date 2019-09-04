@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -77,6 +78,7 @@ public class NewsDetailActivity extends AppCompatActivity {
     MapView mapView;
     TextView emptyRecommendTextView;
     TextView mapTitle;
+    VideoView videoView;
 
     News news;
 
@@ -104,6 +106,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.news_images);
         emptyRecommendTextView = findViewById(R.id.recommendation_empty);
         mapTitle = findViewById(R.id.map_title);
+        videoView = findViewById(R.id.video_view);
 
         mapView = findViewById(R.id.map_view);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
@@ -225,6 +228,14 @@ public class NewsDetailActivity extends AppCompatActivity {
                 overlay2.setPosition(new GeoPoint(location.lat + size, location.lng - size), new GeoPoint(location.lat - size, location.lng + size));
                 mapView.getOverlayManager().add(overlay2);
                 Log.d(TAG, String.format("Add overlay at %f %f", location.lat, location.lng));
+            }
+
+            if (news.video != null && news.video.length() > 0) {
+                Log.d(TAG, "Loading video of url " + news.video);
+                videoView.setVideoURI(Uri.parse(news.video));
+                videoView.start();
+            } else {
+                videoView.setVisibility(View.GONE);
             }
 
             getRecommendation();
