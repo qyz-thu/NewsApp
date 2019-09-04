@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -33,6 +34,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.newsapp.model.Account;
 import com.example.newsapp.model.News;
 import com.google.android.material.navigation.NavigationView;
 
@@ -69,6 +71,7 @@ public class MainActivity extends Activity {
     boolean onlyHistory = false;
     String searchKeyword = "";
     List<Category> allCategories;
+    Account currentAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +88,18 @@ public class MainActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
+        realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(new Account("chenjiajie", "123456"));
+        realm.commitTransaction();
+
+        currentAccount = realm.where(Account.class).equalTo("active", true).findFirst();
+        if (currentAccount == null)
+        {
+            currentAccount = realm.where(Account.class).equalTo("name", "chenjiajie").findFirst();
+            currentAccount.active = true;
+        }
+
         allCategories = new ArrayList<>();
         allCategories.add(new Category(R.id.nav_entertainment, "entertainment", "娱乐"));
         allCategories.add(new Category(R.id.nav_military, "military", "军事"));
@@ -97,7 +112,6 @@ public class MainActivity extends Activity {
         allCategories.add(new Category(R.id.nav_tech, "tech", "科技"));
         allCategories.add(new Category(R.id.nav_society, "society", "社会"));
 
-        realm = Realm.getDefaultInstance();
 
         shiftMode = findViewById(R.id.shift_mode);
         shiftMode.setOnClickListener(new View.OnClickListener() {
@@ -161,6 +175,17 @@ public class MainActivity extends Activity {
         drawerLayout.addDrawerListener(toggle);
 
         navigationView = findViewById(R.id.nav_view);
+        View headview = navigationView.getHeaderView(0);
+        TextView account_name = headview.findViewById(R.id.account_name_view);
+        String _text = "My Account: " + currentAccount.name;
+        account_name.setText(_text);
+
+        ImageView account_avatar = headview.findViewById(R.id.account_avatar_view);
+        if (currentAccount.name.equals("chenjiajie"))
+            account_avatar.setImageResource(R.drawable.cjj_avatar);
+        else if (currentAccount.name.equals("qianyingzhuo"))
+            account_avatar.setImageResource(R.drawable.qyz_avatar);
+
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -202,6 +227,7 @@ public class MainActivity extends Activity {
                 return true;
             }
         });
+
 
         updateData();
     }
