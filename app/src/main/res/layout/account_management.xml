@@ -17,6 +17,7 @@
         />
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/current_account"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -77,5 +78,28 @@
             android:src="@drawable/colored_change"/>
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/star_news_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/current_account"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="30dp"
+        android:text="@string/star_number"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:id="@+id/read_news_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/star_news_number"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:text="@string/history_number"
+        android:textSize="20sp"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

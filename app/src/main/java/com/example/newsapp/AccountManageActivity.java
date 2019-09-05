@@ -33,8 +33,11 @@ public class AccountManageActivity extends AppCompatActivity {
     ImageView editProfileView;
     ImageView plusView;
     ImageView changeView;
-    Realm realm;
+    TextView starNumberView;
+    TextView readNumberView;
 
+
+    Realm realm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,12 +46,21 @@ public class AccountManageActivity extends AppCompatActivity {
 
         currentTitleView = findViewById(R.id.account_manage_name);
         currentImageView = findViewById(R.id.account_manage_avatar);
+        starNumberView = findViewById(R.id.star_news_number);
+        readNumberView = findViewById(R.id.read_news_number);
 
         realm = Realm.getDefaultInstance();
 
-        if (currentAccount.name.equals("chenjiajie"))
+        int star_number = currentAccount.starred_news.size();
+        int read_number = currentAccount.read_news.size();
+        String text = starNumberView.getText().toString() + star_number;
+        starNumberView.setText(text);
+        text = readNumberView.getText().toString() + read_number;
+        readNumberView.setText(text);
+
+        if (currentAccount.id == "chenjiajie".hashCode())
             currentImageView.setImageResource(R.drawable.cjj_avatar);
-        else if (currentAccount.name.equals("qianyingzhuo"))
+        else if (currentAccount.id == "qianyingzhuo".hashCode())
             currentImageView.setImageResource(R.drawable.qyz_avatar);
         else currentImageView.setImageResource(R.drawable.default_avatar);
         currentTitleView.setText(currentAccount.name);
@@ -73,9 +85,9 @@ public class AccountManageActivity extends AppCompatActivity {
                 dialog.show();
 
                 final ImageView avatarView = dialogView.findViewById(R.id.edit_avatar);
-                if (currentAccount.name.equals("chenjiajie"))
+                if (currentAccount.id == "chenjiajie".hashCode())
                     avatarView.setImageResource(R.drawable.cjj_avatar);
-                else if (currentAccount.name.equals("qianyingzhuo"))
+                else if (currentAccount.id == "qianyingzhuo".hashCode())
                     avatarView.setImageResource(R.drawable.qyz_avatar);
                 else avatarView.setImageResource(R.drawable.default_avatar);
 

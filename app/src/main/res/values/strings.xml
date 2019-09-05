@@ -68,4 +68,6 @@
     <string name="map">Locations Map</string>
     <string name="network_error"> error</string>
     <string name="account_management">Account Management</string>
+    <string name="star_number">Number of news starred: </string>
+    <string name="history_number">Number of news read: </string>
 </resources>

@@ -170,13 +170,13 @@ public class MainActivity extends Activity {
         View headview = navigationView.getHeaderView(0);
         TextView account_name = headview.findViewById(R.id.account_name_view);
         String _text = account_name.getText().toString();
-        _text = _text + currentAccount.name;
+        _text = _text + ": " + currentAccount.name;
         account_name.setText(_text);
 
         ImageView account_avatar = headview.findViewById(R.id.account_avatar_view);
-        if (currentAccount.name.equals("chenjiajie"))
+        if (currentAccount.id == "chenjiajie".hashCode())
             account_avatar.setImageResource(R.drawable.cjj_avatar);
-        else if (currentAccount.name.equals("qianyingzhuo"))
+        else if (currentAccount.id == "qianyingzhuo".hashCode())
             account_avatar.setImageResource(R.drawable.qyz_avatar);
         else account_avatar.setImageResource(R.drawable.default_avatar);
         account_avatar.setOnClickListener(new View.OnClickListener() {

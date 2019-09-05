@@ -57,4 +57,6 @@
     <string name="map">相关地点</string>
     <string name="network_error">网络错误</string>
     <string name="account_management">用户管理</string>
+    <string name="star_number">收藏新闻数: </string>
+    <string name="history_number">已读新闻数: </string>
 </resources>
