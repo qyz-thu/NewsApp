@@ -25,6 +25,6 @@ public class NewsImageFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Bundle args = getArguments();
         ImageView imageView = getView().findViewById(R.id.imageView);
-        Glide.with(this).load(args.getString("url")).centerCrop().into(imageView);
+        Glide.with(this).load(args.getString("url")).placeholder(R.drawable.colored_elephant).centerCrop().into(imageView);
     }
 }

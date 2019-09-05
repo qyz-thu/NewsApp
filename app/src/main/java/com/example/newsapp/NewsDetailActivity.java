@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -158,16 +159,6 @@ public class NewsDetailActivity extends AppCompatActivity {
 
             getRecommendation();
 
-
-            if (!news.isRead) {
-                realm.beginTransaction();
-                news.isRead = true;
-                if (news.firstReadTime == null) {
-                    news.firstReadTime = new Date();
-                }
-                realm.commitTransaction();
-            }
-
             if (news.images == null || news.images.size() == 0) {
                 viewPager.setVisibility(View.GONE);
             }
@@ -259,15 +250,6 @@ public class NewsDetailActivity extends AppCompatActivity {
             mapView.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
             mapTitle.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
 
-            for (Location location : news.locations) {
-                GroundOverlay2 overlay2 = new GroundOverlay2();
-                overlay2.setTransparency(0.2f);
-                overlay2.setImage(BitmapFactory.decodeResource(getResources(), R.drawable.colored_elephant));
-                Double size = 1.0;
-                overlay2.setPosition(new GeoPoint(location.lat + size, location.lng - size), new GeoPoint(location.lat - size, location.lng + size));
-                mapView.getOverlayManager().add(overlay2);
-                Log.d(TAG, String.format("Add overlay at %f %f", location.lat, location.lng));
-            }
 
             if (news.video != null && news.video.length() > 0) {
                 Log.d(TAG, "Loading video of url " + news.video);
@@ -284,7 +266,55 @@ public class NewsDetailActivity extends AppCompatActivity {
                 videoView.setVisibility(View.GONE);
             }
 
-            getRecommendation();
+            RecyclerView recyclerView = findViewById(R.id.recommendations);
+            recyclerView.setHasFixedSize(true);
+            final LinearLayoutManager manager = new LinearLayoutManager(this);
+            recyclerView.setLayoutManager(manager);
+            recyclerView.setAdapter(adapter = new RecommendListAdapter(recommendNews, this));
+            adapter.setOnItemClickListener(new RecommendListAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(int position) {
+                    News news = adapter.data.get(position);
+                    Intent intent = new Intent(NewsDetailActivity.this, NewsDetailActivity.class);
+                    intent.putExtra("id", news == null ? "" : news.newsID);
+                    startActivity(intent);
+                }
+            });
+
+            // delay running these
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+
+                    if (!news.isRead) {
+                        realm.beginTransaction();
+                        news.isRead = true;
+                        if (news.firstReadTime == null) {
+                            news.firstReadTime = new Date();
+                        }
+                        realm.commitTransaction();
+                    }
+
+                    getRecommendation();
+
+                }
+            });
+
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.colored_elephant);
+                    for (Location location : news.locations) {
+                        GroundOverlay2 overlay2 = new GroundOverlay2();
+                        overlay2.setTransparency(0.2f);
+                        overlay2.setImage(image);
+                        Double size = 1.0;
+                        overlay2.setPosition(new GeoPoint(location.lat + size, location.lng - size), new GeoPoint(location.lat - size, location.lng + size));
+                        mapView.getOverlayManager().add(overlay2);
+                        Log.d(TAG, String.format("Add overlay at %f %f", location.lat, location.lng));
+                    }
+                }
+            });
         }
     }
 
@@ -316,10 +346,14 @@ public class NewsDetailActivity extends AppCompatActivity {
         RealmQuery<News> query = Realm.getDefaultInstance().where(News.class);
         TreeSet<PairDoubleString> keywords = new TreeSet<>(news.keywords);
         query = query.beginGroup();
-        int i = 0;
+
+        int queryCount = 0;
         for (PairDoubleString p : keywords) {
             if (p.score < 0.3) break;
             Log.d(TAG, p.name);
+
+            // kinda slow..
+            /*
             String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=10&startDate=&endDate=&words=%s&categories=", p.name);
             JsonObjectRequest req = new JsonObjectRequest
                     (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -330,24 +364,44 @@ public class NewsDetailActivity extends AppCompatActivity {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(NewsDetailActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
                             Log.d(TAG, "network", error);
                         }
                     });
+            queue.add(req);
+            */
 
-            if (i > 0) query = query.or();
+            if (queryCount > 0) query = query.or();
             query = query.equalTo("keywords.name", p.name);
-            i++;
-            if (i > 5)
+            queryCount++;
+            if (queryCount > 5)
                 break;
         }
+
+        if (news.category != null) {
+            if (queryCount > 0) {
+                query = query.or();
+                queryCount++;
+            }
+            query = query.equalTo("category", news.category);
+        }
+
+        if (news.publisher != null) {
+            if (queryCount > 0) {
+                query = query.or();
+                queryCount++;
+            }
+            query = query.equalTo("publisher", news.publisher);
+        }
+
         query = query.endGroup();
 
-        query = query.notEqualTo("newsID", news.newsID).sort("publishTime", Sort.DESCENDING).limit(10);
+        query = query.notEqualTo("newsID", news.newsID).sort("publishTime", Sort.DESCENDING).limit(20);
         newsRealmResults = query.findAllAsync();
         newsRealmResults.addChangeListener(new RealmChangeListener<RealmResults<News>>() {
             @Override
             public void onChange(RealmResults<News> res) {
-                Log.d(TAG, "Realm got " + res.toString());
+                Log.d(TAG, "Realm got " + res.size());
                 TreeMap<Double, News> map = new TreeMap<>();
                 for (News n : res) {
                     double score = 0;
@@ -376,22 +430,6 @@ public class NewsDetailActivity extends AppCompatActivity {
             }
         });
 
-        RecyclerView recyclerView = findViewById(R.id.recommendations);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setItemViewCacheSize(20);
-        final LinearLayoutManager manager = new LinearLayoutManager(this);
-        manager.setItemPrefetchEnabled(true);
-        recyclerView.setLayoutManager(manager);
-        recyclerView.setAdapter(adapter = new RecommendListAdapter(recommendNews, this));
-        adapter.setOnItemClickListener(new RecommendListAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(int position) {
-                News news = adapter.data.get(position);
-                Intent intent = new Intent(NewsDetailActivity.this, NewsDetailActivity.class);
-                intent.putExtra("id", news == null ? "" : news.newsID);
-                startActivity(intent);
-            }
-        });
     }
 
     // TODO: news recommendation

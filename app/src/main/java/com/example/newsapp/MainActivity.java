@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -34,6 +35,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.newsapp.model.News;
+import com.example.newsapp.model.PairDoubleString;
 import com.google.android.material.navigation.NavigationView;
 
 import org.json.JSONObject;
@@ -46,6 +48,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -68,6 +71,7 @@ public class MainActivity extends Activity {
     CurrentView currentView = CurrentView.HOME;
     String searchKeyword = "";
     List<Category> allCategories;
+    RealmResults<News> results;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,13 +122,13 @@ public class MainActivity extends Activity {
 
         queue = Volley.newRequestQueue(getApplicationContext());
 
-        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        final RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemViewCacheSize(20);
         final LinearLayoutManager manager = new LinearLayoutManager(this);
         manager.setItemPrefetchEnabled(true);
         recyclerView.setLayoutManager(manager);
-        RealmResults<News> results = realm.where(News.class).findAllAsync().sort("publishTime", Sort.DESCENDING);
+        results = realm.where(News.class).findAllAsync().sort("publishTime", Sort.DESCENDING);
         recyclerView.setAdapter(adapter = new NewsListAdapter(results, this));
         adapter.setOnItemClickListener(new NewsListAdapter.OnItemClickListener() {
             @Override
@@ -217,11 +221,13 @@ public class MainActivity extends Activity {
                 } else {
                     for (Category cat : allCategories) {
                         if (item.getItemId() == cat.navigationId) {
+                            currentView = CurrentView.CATEGORY;
                             category = cat.chineseName;
                             break;
                         }
                     }
                 }
+                Log.d(TAG, "Switch to " + currentView.toString());
 
 
                 updateData();
@@ -236,13 +242,15 @@ public class MainActivity extends Activity {
 
     private void updateData() {
         RealmQuery<News> query;
-        RealmResults<News> results;
         query = realm.where(News.class);
         if (category.length() > 0) {
             query = query.equalTo("category", category);
         } else if (currentView == CurrentView.STARRED) {
             query = query.equalTo("isStarred", true);
         } else if (currentView == CurrentView.HISTORY) {
+            query = query.equalTo("isRead", true);
+        } else if (currentView == CurrentView.RECOMMEND) {
+            // find history first
             query = query.equalTo("isRead", true);
         } else if (searchKeyword.length() > 0) {
             query = query.equalTo("keywords.name", searchKeyword);
@@ -253,11 +261,41 @@ public class MainActivity extends Activity {
             fetchData(null);
         }
 
-        if (currentView == CurrentView.HISTORY) {
+        if (currentView == CurrentView.HISTORY || currentView == CurrentView.RECOMMEND) {
             results = query.findAllAsync().sort("firstReadTime", Sort.DESCENDING);
         } else {
             results = query.findAllAsync().sort("publishTime", Sort.DESCENDING);
         }
+
+        if (currentView == CurrentView.RECOMMEND) {
+            Log.d(TAG, "Updating recommend news");
+            ArrayList<String> keywords = new ArrayList<>();
+            int count = 0;
+            for (News n : results) {
+                for (PairDoubleString keyword : n.keywords) {
+                    if (keyword.score > 0.5) {
+                        keywords.add(keyword.name);
+                        count ++;
+                    }
+                }
+                if (count > 10) {
+                    break;
+                }
+            }
+
+            query = realm.where(News.class);
+            query.beginGroup();
+            for (int i = 0;i < keywords.size();i++) {
+                if (i > 0) {
+                    query = query.or();
+                }
+                query = query.equalTo("keywords.name", keywords.get(i));
+            }
+            query = query.endGroup();
+            query = query.equalTo("isRead", false);
+            results = query.findAllAsync().sort("publishTime", Sort.DESCENDING);
+        }
+
         adapter.updateData(results);
     }
 
@@ -316,6 +354,8 @@ public class MainActivity extends Activity {
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MainActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
+                        swipeRefreshLayout.setRefreshing(false);
                         Log.d(TAG, "network", error);
                     }
                 });
