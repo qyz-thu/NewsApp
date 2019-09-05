@@ -116,14 +116,12 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
             this.firstReadTime = prev.firstReadTime;
         }
 
-        // TODO: the rest
     }
 
     @Override
     public int compareTo(News o) {
         return publishTime.compareTo(o.publishTime);
     }
-
 
 }
 

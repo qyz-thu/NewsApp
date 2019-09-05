@@ -51,6 +51,80 @@ public class AccountManageActivity extends AppCompatActivity {
         else currentImageView.setImageResource(R.drawable.default_avatar);
         currentTitleView.setText(currentAccount.name);
 
+        setEditProfileView();
+
+        plusView = findViewById(R.id.plus_button);
+        changeView = findViewById(R.id.change_button);
+        plusView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(AccountManageActivity.this, "add an account", Toast.LENGTH_LONG).show();
+                // TODO
+                final AlertDialog.Builder builder = new AlertDialog.Builder(AccountManageActivity.this);
+                final AlertDialog dialog = builder.create();
+                View dialogView = View.inflate(AccountManageActivity.this, R.layout.add_account, null);
+                dialog.setView(dialogView);
+                dialog.show();
+
+                final EditText newUsername = dialogView.findViewById(R.id.new_account_name);
+                final EditText newPassword = dialogView.findViewById(R.id.new_account_password);
+                final EditText confirmPassword = dialogView.findViewById(R.id.confirm_new_account_password);
+                newPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                confirmPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+
+                Button cancelButton = dialogView.findViewById(R.id.add_button_cancel);
+                Button confirmButton = dialogView.findViewById(R.id.add_button_confirm);
+
+                cancelButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                    }
+                });
+                confirmButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String username = newUsername.getText().toString();
+                        String password = newPassword.getText().toString();
+                        String confirm_password = confirmPassword.getText().toString();
+
+                        if (!password.equals(confirm_password))
+                        {
+                            Toast.makeText(AccountManageActivity.this, "Passwords are not the same!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        RealmResults<Account> res = realm.where(Account.class).equalTo("name", username).findAll();
+                        if (res.size() != 0)
+                        {
+                            Toast.makeText(AccountManageActivity.this, "Username already exists!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        Account newAccount = new Account(username, password, true);
+                        int hc = username.hashCode();
+                        realm.beginTransaction();
+                        realm.copyToRealmOrUpdate(newAccount);
+                        currentAccount.active = false;
+                        currentAccount = realm.where(Account.class).equalTo("id", hc).findFirst();
+                        realm.commitTransaction();
+                        dialog.dismiss();
+                        finish();
+                        Intent intent = new Intent(AccountManageActivity.this, AccountManageActivity.class);
+                        startActivity(intent);
+                    }
+                });
+
+            }
+        });
+        changeView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(AccountManageActivity.this, "switch an account", Toast.LENGTH_LONG).show();
+                // TODO
+            }
+        });
+    }
+
+    private void setEditProfileView(){
         editProfileView = findViewById(R.id.edit_profile);
         editProfileView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,14 +156,12 @@ public class AccountManageActivity extends AppCompatActivity {
                 cancelButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        // TODO
                         dialog.dismiss();
                     }
                 });
                 confirmButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        // TODO
                         String pw = editPassword.getText().toString();
                         if (!pw.equals(currentAccount.password))
                             Toast.makeText(AccountManageActivity.this, "Incorrect password!", Toast.LENGTH_LONG).show();
@@ -106,7 +178,7 @@ public class AccountManageActivity extends AppCompatActivity {
                                 // check if username duplicate
                                 if (!new_username.equals("")) {
                                     int hc = new_username.hashCode();
-                                    RealmResults<Account> res = realm.where(Account.class).equalTo("id", hc).findAll();
+                                    RealmResults<Account> res = realm.where(Account.class).equalTo("id", hc).notEqualTo("id", currentAccount.id).findAll();
                                     if (res.size() != 0) {
                                         Toast.makeText(AccountManageActivity.this, "Username already exists!", Toast.LENGTH_SHORT).show();
                                         legal = false;
@@ -125,29 +197,8 @@ public class AccountManageActivity extends AppCompatActivity {
 
                             }
                         }
-
                     }
                 });
-
-
-            }
-        });
-
-        plusView = findViewById(R.id.plus_button);
-        changeView = findViewById(R.id.change_button);
-        plusView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(AccountManageActivity.this, "add an account", Toast.LENGTH_LONG).show();
-                // TODO
-            }
-        });
-        changeView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(AccountManageActivity.this, "switch an account", Toast.LENGTH_LONG).show();
-
-                // TODO
             }
         });
     }

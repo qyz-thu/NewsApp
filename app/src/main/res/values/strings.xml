@@ -27,6 +27,13 @@
     <string name="current_account">Current Account</string>
     <string name="enter_password">Enter your current password</string>
     <string name="enter_new_password">Enter new password if you want to change it</string>
+    <string name="add_new_account">Add New Account</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="enter_new_account_username">Enter username for new account</string>
+    <string name="enter_new_account_password">Enter password for new account</string>
+    <string name="confirm_new_account_password">Enter again to confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
     <string-array name="categories_name">
         <item>Entertainment</item>
         <item>Military</item>
