@@ -25,6 +25,8 @@
     <string name="news_starred_off">You no longer star the news</string>
     <string name="recommend">Recommendations</string>
     <string name="current_account">Current Account</string>
+    <string name="enter_password">Enter your current password</string>
+    <string name="enter_new_password">Enter new password if you want to change it</string>
     <string-array name="categories_name">
         <item>Entertainment</item>
         <item>Military</item>

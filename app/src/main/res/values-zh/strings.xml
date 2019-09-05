@@ -21,6 +21,8 @@
     <string name="news_detail">新闻详情</string>
     <string name="recommend">新闻推荐</string>
     <string name="current_account">当前账户</string>
+    <string name="enter_password">请输入当前密码</string>
+    <string name="enter_new_password">请输入新密码</string>
     <string-array name="categories_name">
         <item>娱乐</item>
         <item>军事</item>

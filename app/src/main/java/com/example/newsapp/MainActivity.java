@@ -176,6 +176,7 @@ public class MainActivity extends Activity {
             account_avatar.setImageResource(R.drawable.cjj_avatar);
         else if (currentAccount.name.equals("qianyingzhuo"))
             account_avatar.setImageResource(R.drawable.qyz_avatar);
+        else account_avatar.setImageResource(R.drawable.default_avatar);
         account_avatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

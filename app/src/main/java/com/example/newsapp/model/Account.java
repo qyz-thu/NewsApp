@@ -6,6 +6,8 @@ import io.realm.annotations.PrimaryKey;
 
 public class Account extends RealmObject {
     @PrimaryKey
+    public int id;
+
     public String name;
 
     public String password;
@@ -14,13 +16,13 @@ public class Account extends RealmObject {
     public boolean active;
 
     public Account() {
-
     }
 
     public Account(String name, String pw)
     {
         this.name = name;
         this.password = pw;
+        this.id = name.hashCode();
         this.read_news = new RealmList<>();
         this.starred_news = new RealmList<>();
         this.active = false;
