@@ -11,8 +11,6 @@ public class Account extends RealmObject {
     public String name;
 
     public String password;
-    public RealmList<String> read_news;
-    public RealmList<String> starred_news;
     public boolean active;
 
     public Account() {
@@ -23,8 +21,6 @@ public class Account extends RealmObject {
         this.name = name;
         this.password = pw;
         this.id = name.hashCode();
-        this.read_news = new RealmList<>();
-        this.starred_news = new RealmList<>();
         this.active = false;
     }
 

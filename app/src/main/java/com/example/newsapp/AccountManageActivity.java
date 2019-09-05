@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.newsapp.model.Account;
+import com.example.newsapp.model.News;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,8 +52,8 @@ public class AccountManageActivity extends AppCompatActivity {
 
         realm = Realm.getDefaultInstance();
 
-        int star_number = currentAccount.starred_news.size();
-        int read_number = currentAccount.read_news.size();
+        long star_number = realm.where(News.class).equalTo("isStarred.id", currentAccountId).count();
+        long read_number = realm.where(News.class).equalTo("isRead.id", currentAccountId).count();
         String text = starNumberView.getText().toString() + star_number;
         starNumberView.setText(text);
         text = readNumberView.getText().toString() + read_number;
