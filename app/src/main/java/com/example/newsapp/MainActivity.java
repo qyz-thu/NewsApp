@@ -247,12 +247,12 @@ public class MainActivity extends Activity {
         if (category.length() > 0) {
             query = query.equalTo("category", category);
         } else if (currentView == CurrentView.STARRED) {
-            query = query.equalTo("isStarred", true);
+            query = query.equalTo("isStarred.id", NewsApp.currentAccountId);
         } else if (currentView == CurrentView.HISTORY) {
-            query = query.equalTo("isRead", true);
+            query = query.equalTo("isRead.id", NewsApp.currentAccountId);
         } else if (currentView == CurrentView.RECOMMEND) {
             // find history first
-            query = query.equalTo("isRead", true);
+            query = query.equalTo("isRead.id", NewsApp.currentAccountId);
         } else if (searchKeyword.length() > 0) {
             query = query.equalTo("keywords.name", searchKeyword);
 
@@ -293,7 +293,7 @@ public class MainActivity extends Activity {
                 query = query.equalTo("keywords.name", keywords.get(i));
             }
             query = query.endGroup();
-            query = query.equalTo("isRead", false);
+            query = query.notEqualTo("isRead.id", NewsApp.currentAccountId);
             results = query.findAllAsync().sort("publishTime", Sort.DESCENDING);
         }
 
@@ -319,6 +319,8 @@ public class MainActivity extends Activity {
             darkMode = newDarkMode;
             reload();
         }
+
+        updateData();
     }
 
     void reload() {

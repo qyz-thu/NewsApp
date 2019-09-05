@@ -40,8 +40,8 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
     public RealmList<PairDoubleString> keywords;
     public RealmList<PairDoubleString> who;
 
-    public boolean isRead;
-    public boolean isStarred;
+    public RealmList<Account> isRead;
+    public RealmList<Account> isStarred;
     public Date firstReadTime;
 
     public News() {
@@ -110,12 +110,9 @@ public class News extends RealmObject implements Comparable<News>, Serializable 
         }
 
         News prev = Realm.getDefaultInstance().where(News.class).equalTo("newsID", this.newsID).findFirst();
-        this.isRead = prev != null && prev.isRead;
-        this.isStarred = prev != null && prev.isStarred;
-        if (prev != null) {
-            this.firstReadTime = prev.firstReadTime;
-        }
-
+        this.isRead = prev != null ? prev.isRead : new RealmList<Account>();
+        this.isStarred = prev != null ? prev.isStarred : new RealmList<Account>();
+        this.firstReadTime = prev != null ? prev.firstReadTime : null;
     }
 
     @Override

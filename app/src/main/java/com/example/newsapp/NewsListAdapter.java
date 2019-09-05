@@ -46,7 +46,8 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
     public void onBindViewHolder(@NonNull NewsListAdapter.ViewHolder holder, final int position) {
         final News news = getItem(position);
         holder.titleView.setText(news.title);
-        holder.titleView.setTypeface(Typeface.DEFAULT, news.isRead ? Typeface.NORMAL : Typeface.BOLD);
+        boolean isRead = news.isRead.contains(NewsApp.currentAccount);
+        holder.titleView.setTypeface(Typeface.DEFAULT, isRead ? Typeface.NORMAL : Typeface.BOLD);
         if (!news.images.isEmpty()) {
             String url = news.images.get(0);
             if (url != null && url.length() > 0) {
