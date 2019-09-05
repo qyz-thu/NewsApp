@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 import static com.example.newsapp.NewsApp.currentAccount;
 
@@ -93,6 +94,7 @@ public class AccountManageActivity extends AppCompatActivity {
                         if (!pw.equals(currentAccount.password))
                             Toast.makeText(AccountManageActivity.this, "Incorrect password!", Toast.LENGTH_LONG).show();
                         else {
+                            boolean legal = true;
                             String new_username = editUsername.getText().toString();
                             Pattern pattern = Pattern.compile("[^a-zA-Z0-9_\\-]");
                             Matcher matcher = pattern.matcher(new_username);
@@ -101,11 +103,21 @@ public class AccountManageActivity extends AppCompatActivity {
                                         "Illegal characters in new username!", Toast.LENGTH_LONG).show();
                             else {
                                 realm.beginTransaction();
-                                currentAccount.name = new_username;
+                                // check if username duplicate
+                                if (!new_username.equals("")) {
+                                    int hc = new_username.hashCode();
+                                    RealmResults<Account> res = realm.where(Account.class).equalTo("id", hc).findAll();
+                                    if (res.size() != 0) {
+                                        Toast.makeText(AccountManageActivity.this, "Username already exists!", Toast.LENGTH_SHORT).show();
+                                        legal = false;
+                                    }else currentAccount.name = new_username;
+                                }
+
                                 String new_password = editNewPassword.getText().toString();
                                 if (!new_password.equals(""))
                                     currentAccount.password = new_password;
                                 realm.commitTransaction();
+                                if (!legal) return;
                                 dialog.dismiss();
                                 finish();
                                 Intent intent = new Intent(AccountManageActivity.this, AccountManageActivity.class);
