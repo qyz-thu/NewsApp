@@ -17,6 +17,7 @@ import io.realm.exceptions.RealmMigrationNeededException;
 public class NewsApp extends Application {
     private static final String TAG = NewsApp.class.getName();
     static Account currentAccount;
+    static int currentAccountId;
 
     public NewsApp() {
     }
@@ -48,6 +49,8 @@ public class NewsApp extends Application {
             currentAccount = realm.where(Account.class).equalTo("name", "chenjiajie").findFirst();
             currentAccount.active = true;
         }
+        currentAccountId = currentAccount.id;
+        Log.d(TAG, "Account id is now " + currentAccountId);
         realm.commitTransaction();
 
         IConfigurationProvider osmConf = Configuration.getInstance();

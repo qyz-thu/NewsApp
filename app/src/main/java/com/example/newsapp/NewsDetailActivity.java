@@ -36,6 +36,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.example.newsapp.model.Account;
 import com.example.newsapp.model.Location;
 import com.example.newsapp.model.News;
 import com.example.newsapp.model.PairDoubleString;
@@ -212,17 +213,23 @@ public class NewsDetailActivity extends AppCompatActivity {
 
             bmb.addBuilder(buildSharingButton(R.drawable.ic_images, FetchImagesTask.Target.SELECT));
 
-            SimpleCircleButton.Builder builderImageStar = new SimpleCircleButton.Builder().normalImageRes(news.isStarred ? R.drawable.ic_star_off : R.drawable.ic_star_on)
+            boolean isStarred = news.isStarred.contains(NewsApp.currentAccount);
+            SimpleCircleButton.Builder builderImageStar = new SimpleCircleButton.Builder().normalImageRes(isStarred ? R.drawable.ic_star_off : R.drawable.ic_star_on)
                     .listener(new OnBMClickListener() {
                         @Override
                         public void onBoomButtonClick(int index) {
+                            boolean isStarred = news.isStarred.contains(NewsApp.currentAccount);
                             realm.beginTransaction();
-                            news.isStarred = !news.isStarred;
+                            if (isStarred) {
+                                news.isStarred.remove(NewsApp.currentAccount);
+                            } else {
+                                news.isStarred.add(NewsApp.currentAccount);
+                            }
                             realm.commitTransaction();
-                            Toast.makeText(NewsDetailActivity.this, news.isStarred ? R.string.news_starred_on : R.string.news_starred_off, Toast.LENGTH_LONG).show();
+                            Toast.makeText(NewsDetailActivity.this, isStarred ? R.string.news_starred_off : R.string.news_starred_on, Toast.LENGTH_LONG).show();
 
                             BoomButton button = bmb.getBoomButton(4);
-                            button.getImageView().setImageDrawable(getDrawable(news.isStarred ? R.drawable.ic_star_off : R.drawable.ic_star_on));
+                            button.getImageView().setImageDrawable(getDrawable(isStarred ? R.drawable.ic_star_off : R.drawable.ic_star_on));
                         }
                     });
             bmb.addBuilder(builderImageStar);
@@ -278,15 +285,15 @@ public class NewsDetailActivity extends AppCompatActivity {
 
 
             // delay running these
-            if (!news.isRead) {
+            boolean isRead = news.isRead.contains(NewsApp.currentAccount);
+            if (!isRead) {
                 realm.executeTransactionAsync(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
                         News n = realm.where(News.class).equalTo("newsID", newsID).findFirst();
-                        n.isRead = true;
-                        if (n.firstReadTime == null) {
-                            n.firstReadTime = new Date();
-                        }
+                        Account current = realm.where(Account.class).equalTo("id", NewsApp.currentAccountId).findFirst();
+                        n.isRead.add(current);
+                        n.firstReadTime = new Date();
                     }
                 });
             }

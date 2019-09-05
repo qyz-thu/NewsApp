@@ -44,7 +44,8 @@ public class RecommendListAdapter extends RecyclerView.Adapter<RecommendListAdap
     public void onBindViewHolder(@NonNull RecommendListAdapter.ViewHolder holder, final int position) {
         News news = data.get(position);
         holder.titleView.setText(news.title);
-        holder.titleView.setTypeface(Typeface.DEFAULT, news.isRead ? Typeface.NORMAL : Typeface.BOLD);
+        boolean isRead = news.isRead.contains(NewsApp.currentAccount);
+        holder.titleView.setTypeface(Typeface.DEFAULT, isRead ? Typeface.NORMAL : Typeface.BOLD);
         if (!news.images.isEmpty()) {
             String url = news.images.get(0);
             if (url != null && url.length() > 0) {

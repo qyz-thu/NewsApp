@@ -1,10 +1,10 @@
 package com.example.newsapp;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,8 +23,11 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 import static com.example.newsapp.NewsApp.currentAccount;
+import static com.example.newsapp.NewsApp.currentAccountId;
 
 public class AccountManageActivity extends AppCompatActivity {
+    static String TAG = AccountManageActivity.class.getName();
+
     TextView currentTitleView;
     ImageView currentImageView;
     ImageView editProfileView;
@@ -34,8 +37,7 @@ public class AccountManageActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.account_management);
 
@@ -57,8 +59,7 @@ public class AccountManageActivity extends AppCompatActivity {
 
     }
 
-    private void setEditProfileView()
-    {
+    private void setEditProfileView() {
         editProfileView = findViewById(R.id.edit_profile);
         editProfileView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,7 +68,7 @@ public class AccountManageActivity extends AppCompatActivity {
 
                 final AlertDialog.Builder builder = new AlertDialog.Builder(AccountManageActivity.this);
                 final AlertDialog dialog = builder.create();
-                View dialogView = View.inflate(AccountManageActivity.this, R.layout.edit_profile,null);
+                View dialogView = View.inflate(AccountManageActivity.this, R.layout.edit_profile, null);
                 dialog.setView(dialogView);
                 dialog.show();
 
@@ -116,7 +117,7 @@ public class AccountManageActivity extends AppCompatActivity {
                                     if (res.size() != 0) {
                                         Toast.makeText(AccountManageActivity.this, "Username already exists!", Toast.LENGTH_SHORT).show();
                                         legal = false;
-                                    }else currentAccount.name = new_username;
+                                    } else currentAccount.name = new_username;
                                 }
 
                                 String new_password = editNewPassword.getText().toString();
@@ -137,8 +138,7 @@ public class AccountManageActivity extends AppCompatActivity {
         });
     }
 
-    private void setAddAccountView()
-    {
+    private void setAddAccountView() {
         plusView = findViewById(R.id.plus_button);
         plusView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -173,14 +173,12 @@ public class AccountManageActivity extends AppCompatActivity {
                         String password = newPassword.getText().toString();
                         String confirm_password = confirmPassword.getText().toString();
 
-                        if (!password.equals(confirm_password))
-                        {
+                        if (!password.equals(confirm_password)) {
                             Toast.makeText(AccountManageActivity.this, "Passwords are not the same!", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         RealmResults<Account> res = realm.where(Account.class).equalTo("name", username).findAll();
-                        if (res.size() != 0)
-                        {
+                        if (res.size() != 0) {
                             Toast.makeText(AccountManageActivity.this, "Username already exists!", Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -190,6 +188,8 @@ public class AccountManageActivity extends AppCompatActivity {
                         realm.copyToRealmOrUpdate(newAccount);
                         currentAccount.active = false;
                         currentAccount = realm.where(Account.class).equalTo("id", hc).findFirst();
+                        currentAccountId = currentAccount.id;
+                        Log.d(TAG, "Account id is now " + currentAccountId);
                         realm.commitTransaction();
                         dialog.dismiss();
                         finish();
@@ -202,8 +202,7 @@ public class AccountManageActivity extends AppCompatActivity {
         });
     }
 
-    private void setSwitchAccountView()
-    {
+    private void setSwitchAccountView() {
         changeView = findViewById(R.id.change_button);
         changeView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -235,13 +234,11 @@ public class AccountManageActivity extends AppCompatActivity {
                         String name = username.getText().toString();
                         String pw = password.getText().toString();
                         Account newAccount = realm.where(Account.class).equalTo("name", name).findFirst();
-                        if (newAccount == null)
-                        {
+                        if (newAccount == null) {
                             Toast.makeText(AccountManageActivity.this, "Account doesn't exist!", Toast.LENGTH_LONG).show();
                             return;
                         }
-                        if (!pw.equals(newAccount.password))
-                        {
+                        if (!pw.equals(newAccount.password)) {
                             Toast.makeText(AccountManageActivity.this, "Incorrect password!", Toast.LENGTH_LONG).show();
                             return;
                         }
@@ -249,6 +246,8 @@ public class AccountManageActivity extends AppCompatActivity {
                         currentAccount.active = false;
                         currentAccount = realm.where(Account.class).equalTo("name", name).findFirst();
                         currentAccount.active = true;
+                        currentAccountId = currentAccount.id;
+                        Log.d(TAG, "Account id is now " + currentAccountId);
                         realm.commitTransaction();
                         dialog.dismiss();
                         finish();
