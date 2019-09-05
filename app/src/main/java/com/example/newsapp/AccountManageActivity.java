@@ -54,10 +54,8 @@ public class AccountManageActivity extends AppCompatActivity {
 
         long star_number = realm.where(News.class).equalTo("isStarred.id", currentAccountId).count();
         long read_number = realm.where(News.class).equalTo("isRead.id", currentAccountId).count();
-        String text = starNumberView.getText().toString() + star_number;
-        starNumberView.setText(text);
-        text = readNumberView.getText().toString() + read_number;
-        readNumberView.setText(text);
+        starNumberView.setText(String.format(getString(R.string.star_number), star_number));
+        readNumberView.setText(String.format(getString(R.string.history_number), read_number));
 
         if (currentAccount.id == "chenjiajie".hashCode())
             currentImageView.setImageResource(R.drawable.cjj_avatar);

@@ -18,7 +18,7 @@
     <string name="preferences">設定</string>
     <string name="style">スタイル</string>
     <string name="dark_mode">おやすみモード</string>
-    <string name="my_account">私のアカウント</string>
+    <string name="my_account">私のアカウント: %s</string>
     <string name="news_detail">詳しい内容</string>
     <string name="downloading_images">ダウンロード中、お待ちください…</string>
     <string name="app_not_installed">appをインストールしてないので、シェア失敗した</string>
@@ -57,6 +57,6 @@
     <string name="map">地図</string>
     <string name="network_error">エラー</string>
     <string name="account_management">アカウント管理</string>
-    <string name="star_number">収蔵数: </string>
-    <string name="history_number">既読数: </string>
+    <string name="star_number">収蔵数: %d</string>
+    <string name="history_number">既読数: %d</string>
 </resources>

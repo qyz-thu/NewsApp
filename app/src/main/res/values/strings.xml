@@ -17,7 +17,7 @@
     <string name="preferences">Preferences</string>
     <string name="style">Style</string>
     <string name="dark_mode">Dark Mode</string>
-    <string name="my_account">My Account</string>
+    <string name="my_account">My Account: %s</string>
     <string name="news_detail">News Detail</string>
     <string name="downloading_images">Downloading images, please wait...</string>
     <string name="app_not_installed">Sharing failed because app is not installed</string>
@@ -68,6 +68,6 @@
     <string name="map">Locations Map</string>
     <string name="network_error"> error</string>
     <string name="account_management">Account Management</string>
-    <string name="star_number">Number of news starred: </string>
-    <string name="history_number">Number of news read: </string>
+    <string name="star_number">Number of news starred: %d</string>
+    <string name="history_number">Number of news read: %d</string>
 </resources>

@@ -167,13 +167,11 @@ public class MainActivity extends Activity {
         drawerLayout.addDrawerListener(toggle);
 
         navigationView = findViewById(R.id.nav_view);
-        View headview = navigationView.getHeaderView(0);
-        TextView account_name = headview.findViewById(R.id.account_name_view);
-        String _text = account_name.getText().toString();
-        _text = _text + ": " + currentAccount.name;
-        account_name.setText(_text);
+        View headView = navigationView.getHeaderView(0);
+        TextView account_name = headView.findViewById(R.id.account_name_view);
+        account_name.setText(String.format(getString(R.string.my_account), currentAccount.name));
 
-        ImageView account_avatar = headview.findViewById(R.id.account_avatar_view);
+        ImageView account_avatar = headView.findViewById(R.id.account_avatar_view);
         if (currentAccount.id == "chenjiajie".hashCode())
             account_avatar.setImageResource(R.drawable.cjj_avatar);
         else if (currentAccount.id == "qianyingzhuo".hashCode())

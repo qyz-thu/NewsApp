@@ -45,7 +45,7 @@
         <item>科技</item>
         <item>社会</item>
     </string-array>
-    <string name="my_account">我的帐号</string>
+    <string name="my_account">我的帐号： %s</string>
     <string name="downloading_images">正在下载图片，请稍候。。</string>
     <string name="app_not_installed">未安装 App 故分享失败</string>
     <string name="news_starred_on">已经收藏成功</string>
@@ -57,6 +57,6 @@
     <string name="map">相关地点</string>
     <string name="network_error">网络错误</string>
     <string name="account_management">用户管理</string>
-    <string name="star_number">收藏新闻数: </string>
-    <string name="history_number">已读新闻数: </string>
+    <string name="star_number">收藏新闻数: %d</string>
+    <string name="history_number">已读新闻数: %d</string>
 </resources>
