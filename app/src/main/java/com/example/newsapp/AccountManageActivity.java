@@ -6,6 +6,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import static com.example.newsapp.NewsApp.currentAccount;
+
 public class AccountManageActivity extends AppCompatActivity {
     TextView currentTitleView;
     ImageView currentImageView;
@@ -20,13 +22,13 @@ public class AccountManageActivity extends AppCompatActivity {
         currentTitleView = findViewById(R.id.account_manage_name);
         currentImageView = findViewById(R.id.account_manage_avatar);
 
-        if (MainActivity.currentAccount != null)
+        if (currentAccount != null)
         {
-            if (MainActivity.currentAccount.name.equals("chenjiajie"))
+            if (currentAccount.name.equals("chenjiajie"))
                 currentImageView.setImageResource(R.drawable.cjj_avatar);
-            else if (MainActivity.currentAccount.name.equals("qianyingzhuo"))
+            else if (currentAccount.name.equals("qianyingzhuo"))
                 currentImageView.setImageResource(R.drawable.qyz_avatar);
-            currentTitleView.setText(MainActivity.currentAccount.name);
+            currentTitleView.setText(currentAccount.name);
         }
     }
 }

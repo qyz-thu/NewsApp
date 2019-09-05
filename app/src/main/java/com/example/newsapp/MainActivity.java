@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -19,7 +18,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -35,12 +33,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.newsapp.model.Account;
 import com.example.newsapp.model.News;
 import com.google.android.material.navigation.NavigationView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -55,9 +50,10 @@ import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
+import static com.example.newsapp.NewsApp.currentAccount;
+
 public class MainActivity extends Activity {
     private static final String TAG = MainActivity.class.getName();
-
     RequestQueue queue;
     Realm realm;
     NewsListAdapter adapter;
@@ -68,11 +64,10 @@ public class MainActivity extends Activity {
     boolean darkMode;
     Date lastFetch;
     String category = "";
-    boolean onlyStarred = false;
-    boolean onlyHistory = false;
+
+    CurrentView currentView = CurrentView.HOME;
     String searchKeyword = "";
     List<Category> allCategories;
-    static Account currentAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,17 +85,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        realm.copyToRealmOrUpdate(new Account("chenjiajie", "123456", false));
-        realm.copyToRealmOrUpdate(new Account("qianyingzhuo", "123456", true));
-
-        currentAccount = realm.where(Account.class).equalTo("active", true).findFirst();
-        if (currentAccount == null)
-        {
-            currentAccount = realm.where(Account.class).equalTo("name", "chenjiajie").findFirst();
-            currentAccount.active = true;
-        }
-        realm.commitTransaction();
 
 
         allCategories = new ArrayList<>();
@@ -157,7 +141,8 @@ public class MainActivity extends Activity {
                 super.onScrollStateChanged(recyclerView, newState);
                 int last = manager.findLastVisibleItemPosition();
 
-                if (last >= 0 && last < adapter.getItemCount() && (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount()) && !onlyStarred && !onlyHistory) {
+                if (last >= 0 && last < adapter.getItemCount() && (!recyclerView.canScrollVertically(1) || last * 1.1 > manager.getItemCount()) &&
+                        (currentView == CurrentView.HOME || currentView == CurrentView.CATEGORY || currentView == CurrentView.SEARCH)) {
                     Date publishTime = adapter.getItem(last).publishTime;
                     publishTime.setTime(publishTime.getTime() - 1);
                     fetchData(publishTime);
@@ -201,8 +186,6 @@ public class MainActivity extends Activity {
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                onlyStarred = item.getItemId() == R.id.nav_stars;
-                onlyHistory = item.getItemId() == R.id.nav_history;
                 searchKeyword = "";
                 category = "";
 
@@ -211,6 +194,7 @@ public class MainActivity extends Activity {
                     startActivity(intent);
                     return true;
                 } else if (item.getItemId() == R.id.nav_search) {
+                    currentView = CurrentView.SEARCH;
                     LinearLayout layout = new LinearLayout(MainActivity.this);
                     layout.setPadding(50, 10, 50, 20);
                     final EditText input = new EditText(MainActivity.this);
@@ -224,6 +208,12 @@ public class MainActivity extends Activity {
                                     updateData();
                                 }
                             }).setCancelable(false).show();
+                } else if (item.getItemId() == R.id.nav_stars) {
+                    currentView = CurrentView.STARRED;
+                } else if (item.getItemId() == R.id.nav_history) {
+                    currentView = CurrentView.HISTORY;
+                } else if (item.getItemId() == R.id.nav_recommend) {
+                    currentView = CurrentView.RECOMMEND;
                 } else {
                     for (Category cat : allCategories) {
                         if (item.getItemId() == cat.navigationId) {
@@ -250,19 +240,20 @@ public class MainActivity extends Activity {
         query = realm.where(News.class);
         if (category.length() > 0) {
             query = query.equalTo("category", category);
-        } else if (onlyStarred) {
+        } else if (currentView == CurrentView.STARRED) {
             query = query.equalTo("isStarred", true);
-        } else if (onlyHistory) {
+        } else if (currentView == CurrentView.HISTORY) {
             query = query.equalTo("isRead", true);
         } else if (searchKeyword.length() > 0) {
             query = query.equalTo("keywords.name", searchKeyword);
 
         }
-        swipeRefreshLayout.setEnabled(!onlyStarred && !onlyHistory);
-        if (query.count() < 50 && !onlyHistory && !onlyStarred) {
+        swipeRefreshLayout.setEnabled(currentView == CurrentView.HOME || currentView == CurrentView.CATEGORY || currentView == CurrentView.SEARCH);
+        if (query.count() < 50 && (currentView == CurrentView.HOME || currentView == CurrentView.CATEGORY || currentView == CurrentView.SEARCH)) {
             fetchData(null);
         }
-        if (onlyHistory) {
+
+        if (currentView == CurrentView.HISTORY) {
             results = query.findAllAsync().sort("firstReadTime", Sort.DESCENDING);
         } else {
             results = query.findAllAsync().sort("publishTime", Sort.DESCENDING);
@@ -329,6 +320,15 @@ public class MainActivity extends Activity {
                     }
                 });
         queue.add(req);
+    }
+
+    enum CurrentView {
+        HOME,
+        CATEGORY,
+        STARRED,
+        HISTORY,
+        SEARCH,
+        RECOMMEND
     }
 
 }

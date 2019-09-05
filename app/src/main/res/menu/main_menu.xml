@@ -50,6 +50,11 @@
         </item>
         <group>
             <item
+                android:id="@+id/nav_recommend"
+                android:icon="@drawable/ic_recommend"
+                android:title="@string/recommend">
+            </item>
+            <item
                 android:id="@+id/nav_stars"
                 android:icon="@drawable/ic_star_off"
                 android:title="@string/star">
