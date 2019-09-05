@@ -169,7 +169,8 @@ public class MainActivity extends Activity {
         navigationView = findViewById(R.id.nav_view);
         View headview = navigationView.getHeaderView(0);
         TextView account_name = headview.findViewById(R.id.account_name_view);
-        String _text = "My Account: " + currentAccount.name;
+        String _text = account_name.getText().toString();
+        _text = _text + currentAccount.name;
         account_name.setText(_text);
 
         ImageView account_avatar = headview.findViewById(R.id.account_avatar_view);
