@@ -56,4 +56,5 @@
     <string name="history">歴史</string>
     <string name="map">地図</string>
     <string name="network_error">エラー</string>
+    <string name="account_management">アカウント管理</string>
 </resources>
