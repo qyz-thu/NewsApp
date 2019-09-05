@@ -1,7 +1,12 @@
 package com.example.newsapp;
 
 import android.app.Application;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.res.Resources;
 import android.util.Log;
+
+import androidx.annotation.AnyRes;
 
 import com.example.newsapp.model.Account;
 
@@ -22,6 +27,12 @@ public class NewsApp extends Application {
     public NewsApp() {
     }
 
+    // https://stackoverflow.com/questions/6602417/get-the-uri-of-an-image-stored-in-drawable
+    static String getUriForResource(Context context, @AnyRes int resId) {
+        Resources res = context.getResources();
+        return String.format("%s://%s/%s/%s", ContentResolver.SCHEME_ANDROID_RESOURCE, res.getResourcePackageName(resId), res.getResourceTypeName(resId), res.getResourceEntryName(resId));
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -32,7 +43,7 @@ public class NewsApp extends Application {
         RealmConfiguration config = Realm.getDefaultConfiguration();
         try {
             Realm.getInstance(config);
-        } catch (RealmMigrationNeededException e){
+        } catch (RealmMigrationNeededException e) {
             Log.w(TAG, "Cleaning realm db");
             Realm.deleteRealm(config);
         }
@@ -41,12 +52,17 @@ public class NewsApp extends Application {
 
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
-        realm.copyToRealmOrUpdate(new Account("chenjiajie", "123456", false));
-        realm.copyToRealmOrUpdate(new Account("qianyingzhuo", "123456", true));
+
+        if (realm.where(Account.class).equalTo("name", "chenjiajie").findFirst() == null)  {
+            realm.copyToRealmOrUpdate(new Account("chenjiajie", "123456", getUriForResource(this, R.drawable.cjj_avatar), false));
+        }
+        if (realm.where(Account.class).equalTo("name", "qianyingzhuo").findFirst() == null)  {
+            realm.copyToRealmOrUpdate(new Account("qianyingzhuo", "123456",getUriForResource(this, R.drawable.qyz_avatar), false));
+        }
 
         currentAccount = realm.where(Account.class).equalTo("active", true).findFirst();
         if (currentAccount == null) {
-            currentAccount = realm.where(Account.class).equalTo("name", "chenjiajie").findFirst();
+            currentAccount = realm.where(Account.class).equalTo("name", "qianyingzhuo").findFirst();
             currentAccount.active = true;
         }
         currentAccountId = currentAccount.id;

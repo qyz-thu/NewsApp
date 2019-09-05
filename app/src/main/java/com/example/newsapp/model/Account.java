@@ -9,6 +9,7 @@ public class Account extends RealmObject {
     public int id;
 
     public String name;
+    public String avatar;
 
     public String password;
     public boolean active;
@@ -16,17 +17,18 @@ public class Account extends RealmObject {
     public Account() {
     }
 
-    public Account(String name, String pw)
+    public Account(String name, String pw, String avatar)
     {
         this.name = name;
         this.password = pw;
         this.id = name.hashCode();
+        this.avatar = avatar;
         this.active = false;
     }
 
-    public Account(String name, String pw, boolean on)
+    public Account(String name, String pw, String avatar, boolean on)
     {
-        this(name, pw);
+        this(name, pw, avatar);
         this.active = on;
     }
 

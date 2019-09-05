@@ -40,7 +40,7 @@ public class FetchDataTask extends AsyncTask<JSONObject, Integer, List<News>> {
 
     @Override
     protected void onPostExecute(final List<News> allNews) {
-        Realm.getDefaultInstance().executeTransactionAsync(new Realm.Transaction() {
+        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 for (News news : allNews) {

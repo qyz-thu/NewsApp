@@ -2,7 +2,11 @@ package com.example.newsapp;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
@@ -12,11 +16,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
+import com.bumptech.glide.Glide;
 import com.example.newsapp.model.Account;
 import com.example.newsapp.model.News;
+import com.example.newsapp.model.PairDoubleString;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,8 +47,9 @@ public class AccountManageActivity extends AppCompatActivity {
     ImageView changeView;
     TextView starNumberView;
     TextView readNumberView;
+    ImageView avatarView;
 
-
+    String newAvatar;
     Realm realm;
 
     @Override
@@ -57,11 +69,7 @@ public class AccountManageActivity extends AppCompatActivity {
         starNumberView.setText(String.format(getString(R.string.star_number), star_number));
         readNumberView.setText(String.format(getString(R.string.history_number), read_number));
 
-        if (currentAccount.id == "chenjiajie".hashCode())
-            currentImageView.setImageResource(R.drawable.cjj_avatar);
-        else if (currentAccount.id == "qianyingzhuo".hashCode())
-            currentImageView.setImageResource(R.drawable.qyz_avatar);
-        else currentImageView.setImageResource(R.drawable.default_avatar);
+        currentImageView.setImageURI(Uri.parse(currentAccount.avatar));
         currentTitleView.setText(currentAccount.name);
 
         setEditProfileView();
@@ -70,12 +78,37 @@ public class AccountManageActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            // select avatar
+            // TODO: move it to background thread
+            Uri selected = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selected);
+
+                File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "avatar_image_" + new Date().toString() + ".png");
+                FileOutputStream outputStream = new FileOutputStream(file);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
+                outputStream.close();
+                Uri newUri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file);
+                newAvatar = newUri.toString();
+                avatarView.setImageURI(newUri);
+            } catch (Exception err) {
+                err.printStackTrace();
+            }
+        }
+    }
+
     private void setEditProfileView() {
         editProfileView = findViewById(R.id.edit_profile);
         editProfileView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(AccountManageActivity.this, "edit profile", Toast.LENGTH_LONG).show();
+                newAvatar = null;
 
                 final AlertDialog.Builder builder = new AlertDialog.Builder(AccountManageActivity.this);
                 final AlertDialog dialog = builder.create();
@@ -83,12 +116,16 @@ public class AccountManageActivity extends AppCompatActivity {
                 dialog.setView(dialogView);
                 dialog.show();
 
-                final ImageView avatarView = dialogView.findViewById(R.id.edit_avatar);
-                if (currentAccount.id == "chenjiajie".hashCode())
-                    avatarView.setImageResource(R.drawable.cjj_avatar);
-                else if (currentAccount.id == "qianyingzhuo".hashCode())
-                    avatarView.setImageResource(R.drawable.qyz_avatar);
-                else avatarView.setImageResource(R.drawable.default_avatar);
+                avatarView = dialogView.findViewById(R.id.edit_avatar);
+                avatarView.setImageURI(Uri.parse(currentAccount.avatar));
+
+                avatarView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        startActivityForResult(intent, 0);
+                    }
+                });
 
                 final EditText editPassword = dialogView.findViewById(R.id.password_entry);
                 final EditText editUsername = dialogView.findViewById(R.id.username_entry);
@@ -134,13 +171,17 @@ public class AccountManageActivity extends AppCompatActivity {
                                 String new_password = editNewPassword.getText().toString();
                                 if (!new_password.equals(""))
                                     currentAccount.password = new_password;
+
+                                if (newAvatar != null) {
+                                    currentAccount.avatar = newAvatar;
+                                }
                                 realm.commitTransaction();
                                 if (!legal) return;
                                 dialog.dismiss();
+
                                 finish();
                                 Intent intent = new Intent(AccountManageActivity.this, AccountManageActivity.class);
                                 startActivity(intent);
-
                             }
                         }
                     }
@@ -193,7 +234,7 @@ public class AccountManageActivity extends AppCompatActivity {
                             Toast.makeText(AccountManageActivity.this, "Username already exists!", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        Account newAccount = new Account(username, password, true);
+                        Account newAccount = new Account(username, password, NewsApp.getUriForResource(AccountManageActivity.this, R.drawable.default_avatar), true);
                         int hc = username.hashCode();
                         realm.beginTransaction();
                         realm.copyToRealmOrUpdate(newAccount);

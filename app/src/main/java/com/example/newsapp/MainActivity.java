@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -172,11 +173,7 @@ public class MainActivity extends Activity {
         account_name.setText(String.format(getString(R.string.my_account), currentAccount.name));
 
         ImageView account_avatar = headView.findViewById(R.id.account_avatar_view);
-        if (currentAccount.id == "chenjiajie".hashCode())
-            account_avatar.setImageResource(R.drawable.cjj_avatar);
-        else if (currentAccount.id == "qianyingzhuo".hashCode())
-            account_avatar.setImageResource(R.drawable.qyz_avatar);
-        else account_avatar.setImageResource(R.drawable.default_avatar);
+        account_avatar.setImageURI(Uri.parse(currentAccount.avatar));
         account_avatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
