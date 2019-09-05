@@ -32,6 +32,9 @@
     <string name="enter_new_account_username">Enter username for new account</string>
     <string name="enter_new_account_password">Enter password for new account</string>
     <string name="confirm_new_account_password">Enter again to confirm</string>
+    <string name="switch_account">Switch Account</string>
+    <string name="switch_account_name">Enter account username</string>
+    <string name="switch_account_password">Enter account password</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string-array name="categories_name">

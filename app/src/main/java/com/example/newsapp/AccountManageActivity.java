@@ -52,9 +52,94 @@ public class AccountManageActivity extends AppCompatActivity {
         currentTitleView.setText(currentAccount.name);
 
         setEditProfileView();
+        setAddAccountView();
+        setSwitchAccountView();
 
+    }
+
+    private void setEditProfileView()
+    {
+        editProfileView = findViewById(R.id.edit_profile);
+        editProfileView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(AccountManageActivity.this, "edit profile", Toast.LENGTH_LONG).show();
+
+                final AlertDialog.Builder builder = new AlertDialog.Builder(AccountManageActivity.this);
+                final AlertDialog dialog = builder.create();
+                View dialogView = View.inflate(AccountManageActivity.this, R.layout.edit_profile,null);
+                dialog.setView(dialogView);
+                dialog.show();
+
+                final ImageView avatarView = dialogView.findViewById(R.id.edit_avatar);
+                if (currentAccount.name.equals("chenjiajie"))
+                    avatarView.setImageResource(R.drawable.cjj_avatar);
+                else if (currentAccount.name.equals("qianyingzhuo"))
+                    avatarView.setImageResource(R.drawable.qyz_avatar);
+                else avatarView.setImageResource(R.drawable.default_avatar);
+
+                final EditText editPassword = dialogView.findViewById(R.id.password_entry);
+                final EditText editUsername = dialogView.findViewById(R.id.username_entry);
+                final EditText editNewPassword = dialogView.findViewById(R.id.new_password_entry);
+                editPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                editNewPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                editUsername.setHint(currentAccount.name);
+
+                Button cancelButton = dialogView.findViewById(R.id.button_cancel);
+                Button confirmButton = dialogView.findViewById(R.id.button_confirm);
+                cancelButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                    }
+                });
+                confirmButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String pw = editPassword.getText().toString();
+                        if (!pw.equals(currentAccount.password))
+                            Toast.makeText(AccountManageActivity.this, "Incorrect password!", Toast.LENGTH_LONG).show();
+                        else {
+                            boolean legal = true;
+                            String new_username = editUsername.getText().toString();
+                            Pattern pattern = Pattern.compile("[^a-zA-Z0-9_\\-]");
+                            Matcher matcher = pattern.matcher(new_username);
+                            if (matcher.find())
+                                Toast.makeText(AccountManageActivity.this,
+                                        "Illegal characters in new username!", Toast.LENGTH_LONG).show();
+                            else {
+                                realm.beginTransaction();
+                                // check if username duplicate
+                                if (!new_username.equals("")) {
+                                    int hc = new_username.hashCode();
+                                    RealmResults<Account> res = realm.where(Account.class).equalTo("name", new_username).notEqualTo("id", currentAccount.id).findAll();
+                                    if (res.size() != 0) {
+                                        Toast.makeText(AccountManageActivity.this, "Username already exists!", Toast.LENGTH_SHORT).show();
+                                        legal = false;
+                                    }else currentAccount.name = new_username;
+                                }
+
+                                String new_password = editNewPassword.getText().toString();
+                                if (!new_password.equals(""))
+                                    currentAccount.password = new_password;
+                                realm.commitTransaction();
+                                if (!legal) return;
+                                dialog.dismiss();
+                                finish();
+                                Intent intent = new Intent(AccountManageActivity.this, AccountManageActivity.class);
+                                startActivity(intent);
+
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void setAddAccountView()
+    {
         plusView = findViewById(R.id.plus_button);
-        changeView = findViewById(R.id.change_button);
         plusView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -115,44 +200,29 @@ public class AccountManageActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void setSwitchAccountView()
+    {
+        changeView = findViewById(R.id.change_button);
         changeView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(AccountManageActivity.this, "switch an account", Toast.LENGTH_LONG).show();
                 // TODO
-            }
-        });
-    }
-
-    private void setEditProfileView(){
-        editProfileView = findViewById(R.id.edit_profile);
-        editProfileView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(AccountManageActivity.this, "edit profile", Toast.LENGTH_LONG).show();
-
                 final AlertDialog.Builder builder = new AlertDialog.Builder(AccountManageActivity.this);
                 final AlertDialog dialog = builder.create();
-                View dialogView = View.inflate(AccountManageActivity.this, R.layout.edit_profile,null);
+                View dialogView = View.inflate(AccountManageActivity.this, R.layout.switch_account, null);
                 dialog.setView(dialogView);
                 dialog.show();
 
-                final ImageView avatarView = dialogView.findViewById(R.id.edit_avatar);
-                if (currentAccount.name.equals("chenjiajie"))
-                    avatarView.setImageResource(R.drawable.cjj_avatar);
-                else if (currentAccount.name.equals("qianyingzhuo"))
-                    avatarView.setImageResource(R.drawable.qyz_avatar);
-                else avatarView.setImageResource(R.drawable.default_avatar);
+                final EditText username = dialogView.findViewById(R.id.switch_username_entry);
+                final EditText password = dialogView.findViewById(R.id.switch_password_entry);
+                password.setTransformationMethod(PasswordTransformationMethod.getInstance());
 
-                final EditText editPassword = dialogView.findViewById(R.id.password_entry);
-                final EditText editUsername = dialogView.findViewById(R.id.username_entry);
-                final EditText editNewPassword = dialogView.findViewById(R.id.new_password_entry);
-                editPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                editNewPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                editUsername.setHint(currentAccount.name);
+                Button cancelButton = dialogView.findViewById(R.id.switch_button_cancel);
+                Button confirmButton = dialogView.findViewById(R.id.switch_button_confirm);
 
-                Button cancelButton = dialogView.findViewById(R.id.button_cancel);
-                Button confirmButton = dialogView.findViewById(R.id.button_confirm);
                 cancelButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -162,41 +232,28 @@ public class AccountManageActivity extends AppCompatActivity {
                 confirmButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        String pw = editPassword.getText().toString();
-                        if (!pw.equals(currentAccount.password))
-                            Toast.makeText(AccountManageActivity.this, "Incorrect password!", Toast.LENGTH_LONG).show();
-                        else {
-                            boolean legal = true;
-                            String new_username = editUsername.getText().toString();
-                            Pattern pattern = Pattern.compile("[^a-zA-Z0-9_\\-]");
-                            Matcher matcher = pattern.matcher(new_username);
-                            if (matcher.find())
-                                Toast.makeText(AccountManageActivity.this,
-                                        "Illegal characters in new username!", Toast.LENGTH_LONG).show();
-                            else {
-                                realm.beginTransaction();
-                                // check if username duplicate
-                                if (!new_username.equals("")) {
-                                    int hc = new_username.hashCode();
-                                    RealmResults<Account> res = realm.where(Account.class).equalTo("id", hc).notEqualTo("id", currentAccount.id).findAll();
-                                    if (res.size() != 0) {
-                                        Toast.makeText(AccountManageActivity.this, "Username already exists!", Toast.LENGTH_SHORT).show();
-                                        legal = false;
-                                    }else currentAccount.name = new_username;
-                                }
-
-                                String new_password = editNewPassword.getText().toString();
-                                if (!new_password.equals(""))
-                                    currentAccount.password = new_password;
-                                realm.commitTransaction();
-                                if (!legal) return;
-                                dialog.dismiss();
-                                finish();
-                                Intent intent = new Intent(AccountManageActivity.this, AccountManageActivity.class);
-                                startActivity(intent);
-
-                            }
+                        String name = username.getText().toString();
+                        String pw = password.getText().toString();
+                        Account newAccount = realm.where(Account.class).equalTo("name", name).findFirst();
+                        if (newAccount == null)
+                        {
+                            Toast.makeText(AccountManageActivity.this, "Account doesn't exist!", Toast.LENGTH_LONG).show();
+                            return;
                         }
+                        if (!pw.equals(newAccount.password))
+                        {
+                            Toast.makeText(AccountManageActivity.this, "Incorrect password!", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        realm.beginTransaction();
+                        currentAccount.active = false;
+                        currentAccount = realm.where(Account.class).equalTo("name", name).findFirst();
+                        currentAccount.active = true;
+                        realm.commitTransaction();
+                        dialog.dismiss();
+                        finish();
+                        Intent intent = new Intent(AccountManageActivity.this, AccountManageActivity.class);
+                        startActivity(intent);
                     }
                 });
             }

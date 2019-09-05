@@ -25,9 +25,12 @@
     <string name="enter_new_password">请输入新密码</string>
     <string name="add_new_account">添加新用户</string>
     <string name="edit_profile">修改个人信息</string>
-    <string name="enter_new_account_username">请输入新账号用户名</string>
-    <string name="enter_new_account_password">请输入新账号密码</string>
+    <string name="enter_new_account_username">请输入新账户用户名</string>
+    <string name="enter_new_account_password">请输入新账户密码</string>
     <string name="confirm_new_account_password">请确认密码</string>
+    <string name="switch_account">切换账户</string>
+    <string name="switch_account_name">请输入用户名</string>
+    <string name="switch_account_password">请输入账户密码</string>
     <string name="cancel">取消</string>
     <string name="confirm">确认</string>
     <string-array name="categories_name">
