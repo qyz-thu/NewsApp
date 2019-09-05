@@ -67,4 +67,5 @@
     <string name="history">History</string>
     <string name="map">Locations Map</string>
     <string name="network_error"> error</string>
+    <string name="account_management">Account Management</string>
 </resources>

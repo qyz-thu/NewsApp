@@ -56,4 +56,5 @@
     <string name="history">历史</string>
     <string name="map">相关地点</string>
     <string name="network_error">网络错误</string>
+    <string name="account_management">用户管理</string>
 </resources>
