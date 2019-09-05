@@ -41,7 +41,7 @@
         </activity>
         <activity android:name=".AccountManageActivity"
             android:parentActivityName=".MainActivity"
-            android:label="Account Management" />
+            android:label="@string/account_management" />
 
         <provider
             android:authorities="${applicationId}.provider"
