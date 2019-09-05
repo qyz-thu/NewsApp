@@ -313,6 +313,8 @@ public class NewsDetailActivity extends AppCompatActivity {
                     }
                 }
             });
+        } else {
+            finish();
         }
     }
 

@@ -44,7 +44,7 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
 
     @Override
     public void onBindViewHolder(@NonNull NewsListAdapter.ViewHolder holder, final int position) {
-        News news = getItem(position);
+        final News news = getItem(position);
         holder.titleView.setText(news.title);
         holder.titleView.setTypeface(Typeface.DEFAULT, news.isRead ? Typeface.NORMAL : Typeface.BOLD);
         if (!news.images.isEmpty()) {
@@ -65,7 +65,7 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onItemClickListener.onItemClick(position);
+                onItemClickListener.onItemClick(news.newsID);
             }
         });
     }
@@ -81,7 +81,7 @@ public class NewsListAdapter extends RealmRecyclerViewAdapter<News, NewsListAdap
     }
 
     public interface OnItemClickListener {
-        void onItemClick(int a);
+        void onItemClick(String newsID);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

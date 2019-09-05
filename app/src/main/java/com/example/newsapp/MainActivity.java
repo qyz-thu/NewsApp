@@ -132,10 +132,9 @@ public class MainActivity extends Activity {
         recyclerView.setAdapter(adapter = new NewsListAdapter(results, this));
         adapter.setOnItemClickListener(new NewsListAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(int position) {
-                News news = adapter.getItem(position);
+            public void onItemClick(String newsID) {
                 Intent intent = new Intent(MainActivity.this, NewsDetailActivity.class);
-                intent.putExtra("id", news == null ? "" : news.newsID);
+                intent.putExtra("id", newsID);
                 startActivity(intent);
             }
         });
