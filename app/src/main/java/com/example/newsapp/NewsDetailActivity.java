@@ -33,11 +33,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.newsapp.model.Location;
@@ -48,7 +44,6 @@ import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
 import com.nightonke.boommenu.BoomButtons.SimpleCircleButton;
 import com.nightonke.boommenu.BoomMenuButton;
 
-import org.json.JSONObject;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
@@ -87,6 +82,7 @@ public class NewsDetailActivity extends AppCompatActivity {
     LinearLayout contentView;
 
     News news;
+    String newsID;
 
     List<News> recommendNews;
     RealmResults<News> newsRealmResults;
@@ -101,7 +97,6 @@ public class NewsDetailActivity extends AppCompatActivity {
         setTheme(R.style.NewsDetailTheme);
         setContentView(R.layout.news_detail_activity);
         Intent intent = getIntent();
-        String newsID = "";
 
         queue = Volley.newRequestQueue(getApplicationContext());
         recommendNews = new ArrayList<>();
@@ -281,22 +276,25 @@ public class NewsDetailActivity extends AppCompatActivity {
                 }
             });
 
+
             // delay running these
+            if (!news.isRead) {
+                realm.executeTransactionAsync(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        News n = realm.where(News.class).equalTo("newsID", newsID).findFirst();
+                        n.isRead = true;
+                        if (n.firstReadTime == null) {
+                            n.firstReadTime = new Date();
+                        }
+                    }
+                });
+            }
+
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
-
-                    if (!news.isRead) {
-                        realm.beginTransaction();
-                        news.isRead = true;
-                        if (news.firstReadTime == null) {
-                            news.firstReadTime = new Date();
-                        }
-                        realm.commitTransaction();
-                    }
-
                     getRecommendation();
-
                 }
             });
 
