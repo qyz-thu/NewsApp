@@ -32,8 +32,8 @@
     </style>
 
     <style name="NewsDetailTheme" parent="Theme.AppCompat.Light">
-        <item name="actionBarSize">40dp</item>
-        <item name="colorPrimary">@color/colorPrimaryDark</item>
+        <item name="actionBarSize">50dp</item>
+        <item name="colorPrimary">@color/blue</item>
     </style>
 
     <style name="PreferenceTheme" parent="Theme.AppCompat">

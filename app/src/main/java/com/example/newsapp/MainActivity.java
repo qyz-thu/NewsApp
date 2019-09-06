@@ -113,13 +113,12 @@ public class MainActivity extends Activity {
                 SharedPreferences.Editor pref = sharedPreferences.edit();
                 pref.putBoolean("darkMode", !darkMode);
                 pref.apply();
-
                 reload();
             }
         });
 
         TextView titleText = findViewById(R.id.title_text);
-        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Lato-Regular.ttf");
+        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Lato-Italic.ttf");
         titleText.setTypeface(tf);
 
         queue = Volley.newRequestQueue(getApplicationContext());

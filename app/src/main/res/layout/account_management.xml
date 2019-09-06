@@ -64,16 +64,16 @@
 
         <com.example.newsapp.view.CircularView
             android:id="@+id/plus_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_marginStart="20dp"
             android:src="@drawable/colored_plus"
             />
 
         <com.example.newsapp.view.CircularView
             android:id="@+id/change_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_marginStart="30dp"
             android:src="@drawable/colored_change"/>
 
@@ -97,7 +97,7 @@
         app:layout_constraintTop_toBottomOf="@+id/star_news_number"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="25dp"
         android:text="@string/history_number"
         android:textSize="20sp"/>
 
