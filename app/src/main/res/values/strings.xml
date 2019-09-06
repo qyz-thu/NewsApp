@@ -70,4 +70,9 @@
     <string name="account_management">Account Management</string>
     <string name="star_number">Number of news starred: %d</string>
     <string name="history_number">Number of news read: %d</string>
+    <string name="account_not_exist">Account doesn\'t exist!</string>
+    <string name="incorrect_password">Incorrect password!</string>
+    <string name="illegal_characters_in_username">Illegal characters in new username!</string>
+    <string name="username_already_exists">Username already exists!</string>
+    <string name="password_does_not_math">Password does not match!</string>
 </resources>

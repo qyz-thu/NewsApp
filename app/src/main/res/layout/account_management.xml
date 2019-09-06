@@ -44,8 +44,8 @@
             />
         <com.example.newsapp.view.CircularView
             android:id="@+id/edit_profile"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
             android:src="@drawable/edit_profile"
@@ -64,16 +64,16 @@
 
         <com.example.newsapp.view.CircularView
             android:id="@+id/plus_button"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginStart="20dp"
             android:src="@drawable/colored_plus"
             />
 
         <com.example.newsapp.view.CircularView
             android:id="@+id/change_button"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginStart="30dp"
             android:src="@drawable/colored_change"/>
 

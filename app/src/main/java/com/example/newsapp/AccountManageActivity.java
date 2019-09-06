@@ -105,7 +105,7 @@ public class AccountManageActivity extends AppCompatActivity {
         editProfileView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(AccountManageActivity.this, "edit profile", Toast.LENGTH_LONG).show();
+                //Toast.makeText(AccountManageActivity.this, "edit profile", Toast.LENGTH_LONG).show();
                 newAvatar = null;
 
                 final AlertDialog.Builder builder = new AlertDialog.Builder(AccountManageActivity.this);
@@ -145,7 +145,7 @@ public class AccountManageActivity extends AppCompatActivity {
                     public void onClick(View view) {
                         String pw = editPassword.getText().toString();
                         if (!pw.equals(currentAccount.password))
-                            Toast.makeText(AccountManageActivity.this, "Incorrect password!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(AccountManageActivity.this, R.string.incorrect_password, Toast.LENGTH_LONG).show();
                         else {
                             boolean legal = true;
                             String new_username = editUsername.getText().toString();
@@ -153,7 +153,7 @@ public class AccountManageActivity extends AppCompatActivity {
                             Matcher matcher = pattern.matcher(new_username);
                             if (matcher.find())
                                 Toast.makeText(AccountManageActivity.this,
-                                        "Illegal characters in new username!", Toast.LENGTH_LONG).show();
+                                        R.string.illegal_characters_in_username, Toast.LENGTH_LONG).show();
                             else {
                                 realm.beginTransaction();
                                 // check if username duplicate
@@ -161,7 +161,7 @@ public class AccountManageActivity extends AppCompatActivity {
                                     int hc = new_username.hashCode();
                                     RealmResults<Account> res = realm.where(Account.class).equalTo("name", new_username).notEqualTo("id", currentAccount.id).findAll();
                                     if (res.size() != 0) {
-                                        Toast.makeText(AccountManageActivity.this, "Username already exists!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(AccountManageActivity.this, R.string.username_already_exists, Toast.LENGTH_SHORT).show();
                                         legal = false;
                                     } else currentAccount.name = new_username;
                                 }
@@ -193,7 +193,7 @@ public class AccountManageActivity extends AppCompatActivity {
         plusView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(AccountManageActivity.this, "add an account", Toast.LENGTH_LONG).show();
+                //Toast.makeText(AccountManageActivity.this, "add an account", Toast.LENGTH_LONG).show();
                 // TODO
                 final AlertDialog.Builder builder = new AlertDialog.Builder(AccountManageActivity.this);
                 final AlertDialog dialog = builder.create();
@@ -224,12 +224,12 @@ public class AccountManageActivity extends AppCompatActivity {
                         String confirm_password = confirmPassword.getText().toString();
 
                         if (!password.equals(confirm_password)) {
-                            Toast.makeText(AccountManageActivity.this, "Passwords are not the same!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AccountManageActivity.this, R.string.password_does_not_math, Toast.LENGTH_SHORT).show();
                             return;
                         }
                         RealmResults<Account> res = realm.where(Account.class).equalTo("name", username).findAll();
                         if (res.size() != 0) {
-                            Toast.makeText(AccountManageActivity.this, "Username already exists!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AccountManageActivity.this, R.string.username_already_exists, Toast.LENGTH_SHORT).show();
                             return;
                         }
                         Account newAccount = new Account(username, password, NewsApp.getUriForResource(AccountManageActivity.this, R.drawable.default_avatar), true);
@@ -257,7 +257,7 @@ public class AccountManageActivity extends AppCompatActivity {
         changeView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(AccountManageActivity.this, "switch an account", Toast.LENGTH_LONG).show();
+                //Toast.makeText(AccountManageActivity.this, "switch an account", Toast.LENGTH_LONG).show();
                 // TODO
                 final AlertDialog.Builder builder = new AlertDialog.Builder(AccountManageActivity.this);
                 final AlertDialog dialog = builder.create();
@@ -285,11 +285,11 @@ public class AccountManageActivity extends AppCompatActivity {
                         String pw = password.getText().toString();
                         Account newAccount = realm.where(Account.class).equalTo("name", name).findFirst();
                         if (newAccount == null) {
-                            Toast.makeText(AccountManageActivity.this, "Account doesn't exist!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(AccountManageActivity.this, R.string.account_not_exist, Toast.LENGTH_LONG).show();
                             return;
                         }
                         if (!pw.equals(newAccount.password)) {
-                            Toast.makeText(AccountManageActivity.this, "Incorrect password!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(AccountManageActivity.this, R.string.incorrect_password, Toast.LENGTH_LONG).show();
                             return;
                         }
                         realm.beginTransaction();
