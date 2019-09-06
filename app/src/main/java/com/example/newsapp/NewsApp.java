@@ -1,12 +1,16 @@
 package com.example.newsapp;
 
+import android.Manifest;
 import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.util.Log;
 
 import androidx.annotation.AnyRes;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.newsapp.model.Account;
 

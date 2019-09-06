@@ -1,9 +1,11 @@
 package com.example.newsapp;
 
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -14,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -186,7 +189,7 @@ public class NewsDetailActivity extends AppCompatActivity {
                             canvas.drawColor(Color.WHITE);
                             view.draw(canvas);
 
-                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new SaveTextAndFetchImagesTask(bitmap, NewsDetailActivity.this);
+                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(bitmap, FetchImagesTask.Target.SELECT, news.title, NewsDetailActivity.this);
                             task.execute(new ArrayList<String>());
                         }
                     });
@@ -205,7 +208,7 @@ public class NewsDetailActivity extends AppCompatActivity {
                             canvas.drawColor(Color.WHITE);
                             view.draw(canvas);
 
-                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new SaveTextAndFetchImagesTask(bitmap, NewsDetailActivity.this);
+                            AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(bitmap, FetchImagesTask.Target.SELECT, news.title, NewsDetailActivity.this);
                             task.execute(new ArrayList<>(news.images));
                         }
                     });
@@ -343,7 +346,15 @@ public class NewsDetailActivity extends AppCompatActivity {
                     @Override
                     public void onBoomButtonClick(int index) {
                         Toast.makeText(NewsDetailActivity.this, R.string.downloading_images, Toast.LENGTH_LONG).show();
-                        AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(target, news.title, NewsDetailActivity.this);
+                        View view = contentView;
+
+                        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(),
+                                view.getHeight(), Bitmap.Config.ARGB_8888);
+                        Canvas canvas = new Canvas(bitmap);
+                        canvas.drawColor(Color.WHITE);
+                        view.draw(canvas);
+
+                        AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> task = new FetchImagesTask(bitmap, target, news.title, NewsDetailActivity.this);
                         task.execute(new ArrayList<>(news.images));
                     }
                 });
@@ -475,12 +486,15 @@ public class NewsDetailActivity extends AppCompatActivity {
 }
 
 class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> {
+    private static String TAG = FetchImagesTask.class.getName();
     private Context context;
 
     private Target target;
     private String desc;
+    private Bitmap bitmap;
 
-    FetchImagesTask(Target target, String desc, Context context) {
+    FetchImagesTask(Bitmap bitmap, Target target, String desc, Context context) {
+        this.bitmap = bitmap;
         this.desc = desc;
         this.context = context;
         this.target = target;
@@ -491,7 +505,6 @@ class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Ur
         String appId = null;
         switch (target) {
             case WECHAT:
-            case MOMENTS:
                 appId = "com.tencent.mm";
                 break;
             case QQ:
@@ -512,6 +525,8 @@ class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Ur
         }
 
         ArrayList<Uri> result = new ArrayList<>();
+
+
         for (final String url : urls[0]) {
             try {
                 Bitmap bitmap = Glide.with(context).asBitmap().load(url).submit().get();
@@ -519,13 +534,50 @@ class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Ur
                 FileOutputStream outputStream = new FileOutputStream(file);
                 bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
                 outputStream.close();
-                result.add(FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file));
+                result.add(getImageContentUri(context, file));
             } catch (Exception err) {
                 // ignore
                 err.printStackTrace();
             }
         }
+
+        try {
+            File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_capture_" + new Date().getTime() + ".png");
+            FileOutputStream outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 30, outputStream);
+            outputStream.close();
+            result.add(getImageContentUri(context, file));
+        } catch (Exception err) {
+            // ignore
+            err.printStackTrace();
+        }
         return result;
+    }
+
+    static Uri getImageContentUri(Context context, File imageFile) {
+        String filePath = imageFile.getAbsolutePath();
+        Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                new String[] { MediaStore.Images.Media._ID }, MediaStore.Images.Media.DATA + "=? ",
+                new String[] { filePath }, null);
+        Uri uri = null;
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+                Uri baseUri = Uri.parse("content://media/external/images/media");
+                uri = Uri.withAppendedPath(baseUri, "" + id);
+            }
+
+            cursor.close();
+        }
+
+        if (uri == null) {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.DATA, filePath);
+            uri = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        }
+
+        return uri;
     }
 
     @Override
@@ -536,28 +588,36 @@ class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Ur
         } else {
             // ref: https://github.com/YaphetZhao/ShareAnywhere/blob/master/library_shareanywhere/src/main/java/com/yaphetzhao/library_shareanywhere/ShareAnyWhereUtil.java
             Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-            intent.setType("image/*");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setType("image/png");
             intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, results);
             intent.putExtra("Kdescription", desc);
-            intent.putExtra(Intent.EXTRA_TEXT, desc);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            Log.d(TAG, "Sharing " + results.toString());
 
+            String packageName = null;
             switch (target) {
                 case WECHAT:
-                    intent.setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.tools.ShareImgUI"));
-                    break;
-                case MOMENTS:
-                    intent.setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.tools.ShareToTimeLineUI"));
+                    intent.setPackage("com.tencent.mm");
+                    packageName = "com.tencent.mm";
                     break;
                 case QQ:
                     intent.setPackage("com.tencent.mobileqq");
+                    packageName = "com.tencent.mobileqq";
                     break;
                 case WEIBO:
                     intent.setPackage("com.sina.weibo");
+                    packageName = "com.tencent.weibo";
                     break;
             }
+
+            if (packageName != null) {
+                for (Uri uri : results) {
+                    context.grantUriPermission(packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                }
+            }
+
             if (target == Target.SELECT) {
-                context.startActivity(Intent.createChooser(intent, "分享新闻图片"));
+                context.startActivity(Intent.createChooser(intent, "分享新闻全文与图片"));
             } else {
                 context.startActivity(intent);
             }
@@ -568,59 +628,8 @@ class FetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Ur
     enum Target {
         SELECT,
         WECHAT,
-        MOMENTS,
         WEIBO,
         QQ
     }
 }
 
-class SaveTextAndFetchImagesTask extends AsyncTask<ArrayList<String>, Integer, ArrayList<Uri>> {
-    private Context context;
-    private Bitmap bitmap;
-
-    SaveTextAndFetchImagesTask(Bitmap bitmap, Context context) {
-        this.context = context;
-        this.bitmap = bitmap;
-    }
-
-    @Override
-    protected ArrayList<Uri> doInBackground(ArrayList<String>... urls) {
-
-        ArrayList<Uri> result = new ArrayList<>();
-        try {
-            File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_capture" + new Date().toString() + ".png");
-            FileOutputStream outputStream = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
-            outputStream.close();
-            result.add(FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file));
-        } catch (Exception err) {
-            // ignore
-            err.printStackTrace();
-        }
-        for (final String url : urls[0]) {
-            try {
-                Bitmap bitmap = Glide.with(context).asBitmap().load(url).submit().get();
-                File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_" + url.hashCode() + ".png");
-                FileOutputStream outputStream = new FileOutputStream(file);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
-                outputStream.close();
-                result.add(FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file));
-            } catch (Exception err) {
-                // ignore
-                err.printStackTrace();
-            }
-        }
-        return result;
-    }
-
-    @Override
-    protected void onPostExecute(final ArrayList<Uri> results) {
-        // ref: https://github.com/YaphetZhao/ShareAnywhere/blob/master/library_shareanywhere/src/main/java/com/yaphetzhao/library_shareanywhere/ShareAnyWhereUtil.java
-        Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-        intent.setType("image/*");
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, results);
-
-        context.startActivity(Intent.createChooser(intent, "分享新闻全文长图"));
-    }
-}
