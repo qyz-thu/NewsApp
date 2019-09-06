@@ -348,6 +348,7 @@ public class MainActivity extends Activity {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd%20HH:mm:ss", Locale.CHINA);
         String url = String.format("https://api2.newsminer.net/svc/news/queryNewsList?size=50&endDate=%s&words=%s&categories=%s", format.format(endDate), searchKeyword, category);
         Log.d(TAG, url);
+        swipeRefreshLayout.setRefreshing(true);
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
