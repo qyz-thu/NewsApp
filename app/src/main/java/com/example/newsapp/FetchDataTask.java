@@ -13,7 +13,7 @@ import java.util.List;
 
 import io.realm.Realm;
 
-public class FetchDataTask extends AsyncTask<JSONObject, Integer, List<News>> {
+public class FetchDataTask extends AsyncTask<JSONObject, Integer, List<JSONObject>> {
     private Runnable callback;
 
     FetchDataTask(Runnable callback) {
@@ -21,16 +21,14 @@ public class FetchDataTask extends AsyncTask<JSONObject, Integer, List<News>> {
     }
 
     @Override
-    protected List<News> doInBackground(JSONObject... jsonObjects) {
+    protected List<JSONObject> doInBackground(JSONObject... jsonObjects) {
         final JSONObject response = jsonObjects[0];
-        List<News> result = new ArrayList<>();
+        List<JSONObject> result = new ArrayList<>();
         try {
             JSONArray data = response.getJSONArray("data");
             for (int i = 0; i < data.length(); i++) {
-                final JSONObject obj = data.getJSONObject(i);
-                News news = new News();
-                news.assign(obj);
-                result.add(news);
+                JSONObject obj = data.getJSONObject(i);
+                result.add(obj);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -39,11 +37,13 @@ public class FetchDataTask extends AsyncTask<JSONObject, Integer, List<News>> {
     }
 
     @Override
-    protected void onPostExecute(final List<News> allNews) {
-        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+    protected void onPostExecute(final List<JSONObject> allNews) {
+        Realm.getDefaultInstance().executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                for (News news : allNews) {
+                for (JSONObject obj : allNews) {
+                    News news = new News();
+                    news.assign(obj);
                     realm.copyToRealmOrUpdate(news);
                 }
             }

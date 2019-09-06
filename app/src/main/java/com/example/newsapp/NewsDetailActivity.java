@@ -290,7 +290,7 @@ public class NewsDetailActivity extends AppCompatActivity {
             // delay running these
             boolean isRead = news.isRead.contains(NewsApp.currentAccount);
             if (!isRead) {
-                realm.executeTransactionAsync(new Realm.Transaction() {
+                realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
                         News n = realm.where(News.class).equalTo("newsID", newsID).findFirst();
