@@ -75,4 +75,6 @@
     <string name="illegal_characters_in_username">Illegal characters in new username!</string>
     <string name="username_already_exists">Username already exists!</string>
     <string name="password_does_not_math">Password does not match!</string>
+    <string name="loading_avatar">Loading avatar...</string>
+    <string name="fail_to_set_avatar">Failed to set avatar</string>
 </resources>

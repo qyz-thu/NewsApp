@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -82,21 +83,9 @@ public class AccountManageActivity extends AppCompatActivity {
 
         if (resultCode == RESULT_OK) {
             // select avatar
-            // TODO: move it to background thread
             Uri selected = data.getData();
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selected);
-
-                File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "avatar_image_" + new Date().toString() + ".png");
-                FileOutputStream outputStream = new FileOutputStream(file);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
-                outputStream.close();
-                Uri newUri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file);
-                newAvatar = newUri.toString();
-                avatarView.setImageURI(newUri);
-            } catch (Exception err) {
-                err.printStackTrace();
-            }
+            Toast.makeText(AccountManageActivity.this, R.string.loading_avatar, Toast.LENGTH_LONG).show();
+            new LoadAvatarTask().execute(selected);
         }
     }
 
@@ -307,5 +296,37 @@ public class AccountManageActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    class LoadAvatarTask extends AsyncTask<Uri, Integer, Uri> {
+        LoadAvatarTask() {
+        }
+
+        @Override
+        protected Uri doInBackground(Uri... urls) {
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), urls[0]);
+
+                File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "avatar_image_" + new Date().toString() + ".png");
+                FileOutputStream outputStream = new FileOutputStream(file);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
+                outputStream.close();
+                Uri newUri = FileProvider.getUriForFile(AccountManageActivity.this, BuildConfig.APPLICATION_ID + ".provider", file);
+                return newUri;
+            } catch (Exception err) {
+                err.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(final Uri newUri) {
+            if (newUri != null) {
+                newAvatar = newUri.toString();
+                avatarView.setImageURI(newUri);
+            } else {
+                Toast.makeText(AccountManageActivity.this, R.string.fail_to_set_avatar, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }
