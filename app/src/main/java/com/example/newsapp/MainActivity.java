@@ -298,7 +298,8 @@ public class MainActivity extends Activity {
                 query = query.equalTo("keywords.name", keywords.get(i));
             }
             query = query.endGroup();
-            query = query.notEqualTo("isRead.id", NewsApp.currentAccountId);
+            // does not work
+            // query = query.notEqualTo("isRead.id", NewsApp.currentAccountId);
             results = query.findAllAsync().sort("publishTime", Sort.DESCENDING);
         }
 

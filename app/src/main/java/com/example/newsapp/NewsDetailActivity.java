@@ -113,36 +113,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         mapTitle = findViewById(R.id.map_title);
         videoView = findViewById(R.id.video_view);
         contentView = findViewById(R.id.content_view);
-
         mapView = findViewById(R.id.map_view);
-        mapView.setTileSource(TileSourceFactory.MAPNIK);
-        mapView.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.ALWAYS);
-        mapView.setMultiTouchControls(true);
-
-        // ref: https://stackoverflow.com/questions/6210895/listview-inside-scrollview-is-not-scrolling-on-android
-        mapView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                int action = motionEvent.getAction();
-                switch (action) {
-                    case MotionEvent.ACTION_DOWN:
-                        // Disallow ScrollView to intercept touch events.
-                        view.getParent().requestDisallowInterceptTouchEvent(true);
-                        break;
-
-                    case MotionEvent.ACTION_UP:
-                        // Allow ScrollView to intercept touch events.
-                        view.getParent().requestDisallowInterceptTouchEvent(false);
-                        break;
-                }
-
-                return false;
-            }
-        });
-
-        IMapController controller = mapView.getController();
-        controller.setZoom(4);
-        controller.setCenter(new GeoPoint(48.39479, 129.49519));
 
         if (intent != null) {
             newsID = intent.getStringExtra("id");
@@ -252,7 +223,6 @@ public class NewsDetailActivity extends AppCompatActivity {
             bmb.addBuilder(buildSharingButton(R.drawable.ic_weibo, FetchImagesTask.Target.WEIBO));
 
 
-            mapView.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
             mapTitle.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
 
 
@@ -288,18 +258,24 @@ public class NewsDetailActivity extends AppCompatActivity {
 
 
             // delay running these
-            boolean isRead = news.isRead.contains(NewsApp.currentAccount);
-            if (!isRead) {
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm) {
-                        News n = realm.where(News.class).equalTo("newsID", newsID).findFirst();
-                        Account current = realm.where(Account.class).equalTo("id", NewsApp.currentAccountId).findFirst();
-                        n.isRead.add(current);
-                        n.firstReadTime = new Date();
+
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    boolean isRead = news.isRead.contains(NewsApp.currentAccount);
+                    if (!isRead) {
+                        realm.executeTransaction(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm realm) {
+                                News n = realm.where(News.class).equalTo("newsID", newsID).findFirst();
+                                Account current = realm.where(Account.class).equalTo("id", NewsApp.currentAccountId).findFirst();
+                                n.isRead.add(current);
+                                n.firstReadTime = new Date();
+                            }
+                        });
                     }
-                });
-            }
+                }
+            });
 
             new Handler().post(new Runnable() {
                 @Override
@@ -311,6 +287,36 @@ public class NewsDetailActivity extends AppCompatActivity {
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
+                    mapView.setTileSource(TileSourceFactory.MAPNIK);
+                    mapView.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.ALWAYS);
+                    mapView.setMultiTouchControls(true);
+                    mapView.setVisibility(news.locations.size() > 0 ? View.VISIBLE : View.GONE);
+
+                    // ref: https://stackoverflow.com/questions/6210895/listview-inside-scrollview-is-not-scrolling-on-android
+                    mapView.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View view, MotionEvent motionEvent) {
+                            int action = motionEvent.getAction();
+                            switch (action) {
+                                case MotionEvent.ACTION_DOWN:
+                                    // Disallow ScrollView to intercept touch events.
+                                    view.getParent().requestDisallowInterceptTouchEvent(true);
+                                    break;
+
+                                case MotionEvent.ACTION_UP:
+                                    // Allow ScrollView to intercept touch events.
+                                    view.getParent().requestDisallowInterceptTouchEvent(false);
+                                    break;
+                            }
+
+                            return false;
+                        }
+                    });
+
+                    IMapController controller = mapView.getController();
+                    controller.setZoom(4);
+                    controller.setCenter(new GeoPoint(48.39479, 129.49519));
+
                     Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.colored_elephant);
                     for (Location location : news.locations) {
                         GroundOverlay2 overlay2 = new GroundOverlay2();
@@ -319,7 +325,7 @@ public class NewsDetailActivity extends AppCompatActivity {
                         Double size = 1.0;
                         overlay2.setPosition(new GeoPoint(location.lat + size, location.lng - size), new GeoPoint(location.lat - size, location.lng + size));
                         mapView.getOverlayManager().add(overlay2);
-                        Log.d(TAG, String.format("Add overlay at %f %f", location.lat, location.lng));
+                        //Log.d(TAG, String.format("Add overlay at %f %f", location.lat, location.lng));
                     }
                 }
             });
@@ -368,7 +374,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         int queryCount = 0;
         for (PairDoubleString p : keywords) {
             if (p.score < 0.3) break;
-            Log.d(TAG, p.name);
+            //Log.d(TAG, p.name);
 
             // kinda slow..
             /*
